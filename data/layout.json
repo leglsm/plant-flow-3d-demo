@@ -58,6 +58,30 @@
    "emptyMagPerCart": 20,
    "cellsPerMagazine": 300,
    "src": "fictional"
+  },
+  "handling": {
+   "pickSec": 15,
+   "putSec": 15,
+   "perLevelSec": 5,
+   "labelSec": 30,
+   "iqcSec": 60,
+   "qiHoldMin": 120,
+   "waveLeadMin": 75,
+   "truckLeadMin": 25,
+   "kitManualSec": 240,
+   "kitStdSec": 150,
+   "kitSplitSec": 120,
+   "shrinkLoadSec": 10,
+   "dropSec": 2,
+   "cartUnloadSec": 30,
+   "amrLoadSec": 20,
+   "amrUnloadSec": 30,
+   "asrsDwellMin": 30,
+   "lineInputSec": 15,
+   "unpackMidSec": 8,
+   "retryMin": 15,
+   "deliveryPallets": 8,
+   "src": "assumption"
   }
  },
  "modules": [
@@ -242,10 +266,10 @@
     166,
     26
    ],
-   "capa": null,
-   "capaUnit": null,
+   "capa": 8,
+   "capaUnit": "PLT",
    "src": "fictional",
-   "capaCalc": null
+   "capaCalc": 8
   },
   {
    "id": "PA-CELL",
@@ -287,7 +311,7 @@
    "rect": [
     136,
     62,
-    172,
+    174,
     88
    ],
    "capa": null,
@@ -842,7 +866,7 @@
     1.2,
     1.0
    ],
-   "fill": 0.25,
+   "fill": 0.0,
    "src": "fictional"
   },
   {
@@ -863,7 +887,7 @@
     1.2,
     1.0
    ],
-   "fill": 0.3,
+   "fill": 0.0,
    "src": "fictional"
   },
   {
@@ -884,7 +908,7 @@
     1.2,
     1.0
    ],
-   "fill": 0.1,
+   "fill": 0.0,
    "src": "fictional"
   },
   {
@@ -926,7 +950,7 @@
     1.2,
     1.0
    ],
-   "fill": 0.2,
+   "fill": 0.0,
    "src": "fictional"
   },
   {
@@ -947,7 +971,28 @@
     1.2,
     1.0
    ],
-   "fill": 0.25,
+   "fill": 0.0,
+   "src": "fictional"
+  },
+  {
+   "id": "FL-PA-KIT",
+   "zone": "PA-KIT",
+   "label": "KIT",
+   "origin": [
+    150.5,
+    20.5
+   ],
+   "cols": 4,
+   "rows": 2,
+   "pitch": [
+    2.6,
+    2.4
+   ],
+   "slot": [
+    1.2,
+    1.0
+   ],
+   "fill": 0.0,
    "src": "fictional"
   }
  ],
@@ -986,9 +1031,9 @@
    "type": "table",
    "name": "ID & Label Table",
    "rect": [
-    166.5,
+    171,
     68,
-    169.5,
+    174,
     71
    ],
    "h": 0.9,
@@ -1071,9 +1116,9 @@
    "type": "bander",
    "name": "Banding Machine",
    "rect": [
-    137,
+    143,
     83,
-    140,
+    146,
     86
    ],
    "h": 2.4,
@@ -1391,6 +1436,7 @@
    "desc": "Electrode Foil Roll A",
    "uom": "PLT",
    "kind": "RM",
+   "lean": false,
    "src": "fictional"
   },
   {
@@ -1398,6 +1444,7 @@
    "desc": "Electrode Foil Roll B",
    "uom": "PLT",
    "kind": "RM",
+   "lean": false,
    "src": "fictional"
   },
   {
@@ -1405,6 +1452,7 @@
    "desc": "Separator Film Roll",
    "uom": "PLT",
    "kind": "RM",
+   "lean": false,
    "src": "fictional"
   },
   {
@@ -1412,6 +1460,7 @@
    "desc": "Electrolyte Drum",
    "uom": "PLT",
    "kind": "RM",
+   "lean": true,
    "src": "fictional"
   },
   {
@@ -1419,6 +1468,7 @@
    "desc": "Can Housing Tray",
    "uom": "PLT",
    "kind": "RM",
+   "lean": false,
    "src": "fictional"
   },
   {
@@ -1426,6 +1476,7 @@
    "desc": "Cap Assembly Tray",
    "uom": "PLT",
    "kind": "RM",
+   "lean": false,
    "src": "fictional"
   },
   {
@@ -1433,6 +1484,7 @@
    "desc": "Tab Lead Reel",
    "uom": "PLT",
    "kind": "RM",
+   "lean": false,
    "src": "fictional"
   },
   {
@@ -1440,6 +1492,7 @@
    "desc": "Insulation Tape Reel",
    "uom": "PLT",
    "kind": "RM",
+   "lean": false,
    "src": "fictional"
   },
   {
@@ -1848,7 +1901,7 @@
    "process": "idLabel",
    "flow": "B",
    "home": [
-    168,
+    172.5,
     71.8
    ],
    "shift": "A",
@@ -1912,7 +1965,7 @@
    "process": "idLabel",
    "flow": "B",
    "home": [
-    168,
+    172.5,
     71.8
    ],
    "shift": "B",
@@ -2367,10 +2420,10 @@
     "zone": "PA-PACK",
     "equip": "TBL-ID",
     "at": [
-     168,
+     172.5,
      71.8
     ],
-    "sec": 30
+    "sec": 20
    },
    {
     "id": "inspect",
@@ -2380,7 +2433,7 @@
      163,
      71.8
     ],
-    "sec": 35
+    "sec": 30
    },
    {
     "id": "shrink",
@@ -2398,7 +2451,7 @@
     "equip": "SHR-2",
     "at": [
      157,
-     79.8
+     73.4
     ],
     "sec": 50
    },
@@ -2501,7 +2554,31 @@
     79.5
    ]
   ],
-  "note": "sec = task time per small box (band: per large box, palletize: per mid box, stuff: per mid box)."
+  "note": "sec = task time per small box (band: per large box, palletize: per mid box, stuff: per mid box; unpack: per small box; amrOut/asrsIn: per AMR cart)."
+ },
+ "points": {
+  "lineInput": [
+   150.6,
+   45
+  ],
+  "unpackDrop": [
+   137.2,
+   55.5
+  ],
+  "fgPickup": [
+   137.6,
+   79.5
+  ],
+  "magCart": [
+   144.2,
+   55.5
+  ],
+  "emptyMagBuffer": [
+   169.6,
+   72.4
+  ],
+  "src": "fictional",
+  "doc": "Fixed hand-off points used by the schedule (worker/forklift stand points)."
  },
  "assumptions": {
   "packOption": 1,
@@ -2522,8 +2599,8 @@
    "packOption": "1 = one shrink wrapper (SHR-1); 2 = two wrappers (SHR-1 + SHR-2).",
    "volumeLevel": "0-4, index into volumes.levels (daily volume factor).",
    "equip": "Active AMR count per direction (1-3); resources gated by presetGated/gateIndex.",
-   "manualKitting": "true = RM is kitted by hand at the line handover (extra Material Handler time).",
-   "glSplit": "true = goods-to-line split: kitting moves to the Kitting Area (PA-KIT), handover only hands over kits.",
+   "manualKitting": "true = RM is kitted by hand at the line handover (kitManualSec); false = standard kitting at the handover (kitStdSec).",
+   "glSplit": "true = goods-to-line split: the line-feed forklift drops at the Kitting Area (PA-KIT), kitting there (kitSplitSec), then straight to the line.",
    "moveMetric": "Travel distance measured along corridors (approach -> corridor axis -> approach).",
    "lot": "Batch and lot granularity for lineage ids."
   }

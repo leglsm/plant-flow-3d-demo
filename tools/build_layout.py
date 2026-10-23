@@ -71,6 +71,12 @@ RACK_TYPES = {
                 "palletsPerBay": 2, "src": E},
 }
 
+HANDLING = {"pickSec": 15, "putSec": 15, "perLevelSec": 5, "labelSec": 30, "iqcSec": 60,
+            "qiHoldMin": 120, "waveLeadMin": 75, "truckLeadMin": 25, "kitManualSec": 240, "kitStdSec": 150,
+            "kitSplitSec": 120, "shrinkLoadSec": 10, "dropSec": 2, "cartUnloadSec": 30, "amrLoadSec": 20,
+            "amrUnloadSec": 30, "asrsDwellMin": 30, "lineInputSec": 15, "unpackMidSec": 8, "retryMin": 15,
+            "deliveryPallets": 8, "src": A}
+
 PACKING = {"cellsPerSmall": 300, "smallPerMid": 4, "midPerLarge": 24,
            "smallPerFlatCart": 16, "magazinesPerAmrCart": 8, "emptyMagPerCart": 20,
            "cellsPerMagazine": 300, "src": F}
@@ -92,10 +98,10 @@ ZONES = [
     ("PA-IQC", "PA", "Label & Incoming Inspection", "rcv", [118, 32, 132, 48], 20),
     ("PA-RM", "PA", "Raw Material Racks", "sto", [102, 4, 132, 27], 560),
     ("PA-HO", "PA", "Line Handover", "cell", [136, 32, 146, 44], 12),
-    ("PA-KIT", "PA", "Kitting Area", "cell", [148, 10, 166, 26], None),
+    ("PA-KIT", "PA", "Kitting Area", "cell", [148, 10, 166, 26], 8),
     ("PA-CELL", "PA", "Cell Production (context)", "ctx", [148, 32, 218, 58], None),
     ("PA-UNPK", "PA", "Unpack & Re-input", "cell", [136, 46, 146, 58], None),
-    ("PA-PACK", "PA", "Packing", "cell", [136, 62, 172, 88], None),
+    ("PA-PACK", "PA", "Packing", "cell", [136, 62, 174, 88], None),
     ("PA-ASRS", "PA", "Magazine AS/RS", "cell", [174, 62, 198, 76], None),
     ("PA-OUT", "PA", "Next Process (context)", "ctx", [200, 64, 218, 88], None),
     ("PA-FG", "PA", "Finished Goods High-bay", "sto", [102, 62, 132, 88], 750),
@@ -176,7 +182,8 @@ def build():
         ("RM-100507", "Tab Lead Reel"), ("RM-100611", "Insulation Tape Reel"),
     ]
     fg_items = [("FG-200101", "Cell Model A1"), ("FG-200102", "Cell Model A2"), ("FG-200201", "Cell Model B1")]
-    items = ([{"pn": p, "desc": d, "uom": "PLT", "kind": "RM", "src": F} for p, d in rm_items]
+    lean = {"RM-100330"}   # no opening stock anywhere: today's receipts feed the line (full-journey trace)
+    items = ([{"pn": p, "desc": d, "uom": "PLT", "kind": "RM", "lean": p in lean, "src": F} for p, d in rm_items]
              + [{"pn": p, "desc": d, "uom": "EA", "kind": "FG", "src": F} for p, d in fg_items])
 
     def rm_cycle(n):
@@ -199,31 +206,33 @@ def build():
     # ---- floor slot blocks ----
     floors = [
         {"id": "FL-OW-RCV", "zone": "OW-RCV", "label": "RCV", "origin": [3, 35], "cols": 6, "rows": 4,
-         "pitch": [2.6, 2.8], "slot": [1.2, 1.0], "fill": 0.25, "src": F},
+         "pitch": [2.6, 2.8], "slot": [1.2, 1.0], "fill": 0.0, "src": F},
         {"id": "FL-OW-QI", "zone": "OW-QI", "label": "QI", "origin": [23, 35], "cols": 8, "rows": 4,
-         "pitch": [2.6, 2.8], "slot": [1.2, 1.0], "fill": 0.30, "src": F},
+         "pitch": [2.6, 2.8], "slot": [1.2, 1.0], "fill": 0.0, "src": F},
         {"id": "FL-OW-STG", "zone": "OW-STG", "label": "STG", "origin": [53.6, 5], "cols": 4, "rows": 8,
-         "pitch": [2.3, 2.8], "slot": [1.2, 1.0], "fill": 0.10, "src": F},
+         "pitch": [2.3, 2.8], "slot": [1.2, 1.0], "fill": 0.0, "src": F},
         {"id": "FL-PA-DOCK", "zone": "PA-DOCK", "label": "DCK", "origin": [103, 33], "cols": 4, "rows": 5,
          "pitch": [2.6, 2.8], "slot": [1.2, 1.0], "fill": 0.0, "src": F},
         {"id": "FL-PA-IQC", "zone": "PA-IQC", "label": "IQC", "origin": [119, 33], "cols": 4, "rows": 5,
-         "pitch": [2.6, 2.8], "slot": [1.2, 1.0], "fill": 0.20, "src": F},
+         "pitch": [2.6, 2.8], "slot": [1.2, 1.0], "fill": 0.0, "src": F},
         {"id": "FL-PA-HO", "zone": "PA-HO", "label": "HO", "origin": [137, 33], "cols": 3, "rows": 4,
-         "pitch": [2.6, 2.8], "slot": [1.2, 1.0], "fill": 0.25, "src": F},
+         "pitch": [2.6, 2.8], "slot": [1.2, 1.0], "fill": 0.0, "src": F},
+        {"id": "FL-PA-KIT", "zone": "PA-KIT", "label": "KIT", "origin": [150.5, 20.5], "cols": 4, "rows": 2,
+         "pitch": [2.6, 2.4], "slot": [1.2, 1.0], "fill": 0.0, "src": F},
     ]
 
     # ---- equipment ----
     equipment = [
         {"id": "ASRS-1", "zone": "PA-ASRS", "type": "asrs", "name": "Magazine AS/RS", "rect": [176, 64, 196, 74],
          "h": 10, "ports": {"packOut": [175.2, 69], "reinputIn": [186, 63.2], "amrOut": [196.8, 69]}, "src": F},
-        {"id": "TBL-ID", "zone": "PA-PACK", "type": "table", "name": "ID & Label Table", "rect": [166.5, 68, 169.5, 71], "h": 0.9, "src": F},
+        {"id": "TBL-ID", "zone": "PA-PACK", "type": "table", "name": "ID & Label Table", "rect": [171, 68, 174, 71], "h": 0.9, "src": F},
         {"id": "TBL-INS", "zone": "PA-PACK", "type": "table", "name": "Inspection Table", "rect": [161.5, 68, 164.5, 71], "h": 0.9, "src": F},
         {"id": "SHR-1", "zone": "PA-PACK", "type": "shrinkWrapper", "name": "Shrink Wrapper 1", "rect": [155, 67, 159, 72], "h": 2.2, "src": F},
         {"id": "SHR-2", "zone": "PA-PACK", "type": "shrinkWrapper", "name": "Shrink Wrapper 2", "rect": [155, 74, 159, 79], "h": 2.2,
          "note": "Active only with packOption 2", "src": F},
         {"id": "TBL-STF", "zone": "PA-PACK", "type": "table", "name": "Mid-box Stuffing Table", "rect": [144, 78, 148, 81], "h": 0.9, "src": F},
         {"id": "TBL-PLT", "zone": "PA-PACK", "type": "palletStand", "name": "Large-box Pallet Stand", "rect": [139, 78, 142, 81], "h": 0.3, "src": F},
-        {"id": "BND-1", "zone": "PA-PACK", "type": "bander", "name": "Banding Machine", "rect": [137, 83, 140, 86], "h": 2.4, "src": F},
+        {"id": "BND-1", "zone": "PA-PACK", "type": "bander", "name": "Banding Machine", "rect": [143, 83, 146, 86], "h": 2.4, "src": F},
         {"id": "TBL-UNPK", "zone": "PA-UNPK", "type": "table", "name": "Unpack Table", "rect": [138, 50, 142, 53], "h": 0.9, "src": F},
         {"id": "TBL-MAG", "zone": "PA-UNPK", "type": "table", "name": "Magazine Load Table", "rect": [143, 50, 145.5, 53], "h": 0.9, "src": F},
         {"id": "KIT-1", "zone": "PA-KIT", "type": "table", "name": "Kitting Table 1", "rect": [150, 14, 156, 18], "h": 0.9, "src": F},
@@ -260,10 +269,10 @@ def build():
         "src": A,
         "points": [
             {"id": "discharge", "zone": "PA-ASRS", "equip": "ASRS-1", "at": [175.2, 69], "sec": 12},
-            {"id": "idLabel", "zone": "PA-PACK", "equip": "TBL-ID", "at": [168, 71.8], "sec": 30},
-            {"id": "inspect", "zone": "PA-PACK", "equip": "TBL-INS", "at": [163, 71.8], "sec": 35},
+            {"id": "idLabel", "zone": "PA-PACK", "equip": "TBL-ID", "at": [172.5, 71.8], "sec": 20},
+            {"id": "inspect", "zone": "PA-PACK", "equip": "TBL-INS", "at": [163, 71.8], "sec": 30},
             {"id": "shrink", "zone": "PA-PACK", "equip": "SHR-1", "at": [157, 72.8], "sec": 50},
-            {"id": "shrink2", "zone": "PA-PACK", "equip": "SHR-2", "at": [157, 79.8], "sec": 50},
+            {"id": "shrink2", "zone": "PA-PACK", "equip": "SHR-2", "at": [157, 73.4], "sec": 50},
             {"id": "stuff", "zone": "PA-PACK", "equip": "TBL-STF", "at": [146, 81.8], "sec": 60},
             {"id": "palletize", "zone": "PA-PACK", "equip": "TBL-PLT", "at": [140.5, 81.8], "sec": 40},
             {"id": "band", "zone": "PA-PACK", "equip": "BND-1", "at": [141, 84.5], "sec": 180},
@@ -274,8 +283,13 @@ def build():
             {"id": "nextProcess", "zone": "PA-OUT", "equip": None, "at": [209, 76], "sec": 20},
         ],
         "flatCartPath": [[154.2, 69.5], [151, 69.5], [151, 79.5], [148.6, 79.5]],
-        "note": "sec = task time per small box (band: per large box, palletize: per mid box, stuff: per mid box).",
+        "note": "sec = task time per small box (band: per large box, palletize: per mid box, stuff: per mid box; unpack: per small box; amrOut/asrsIn: per AMR cart).",
     }
+
+    points = {
+        "lineInput": [150.6, 45], "unpackDrop": [137.2, 55.5], "fgPickup": [137.6, 79.5],
+        "magCart": [144.2, 55.5], "emptyMagBuffer": [169.6, 72.4],
+        "src": F, "doc": "Fixed hand-off points used by the schedule (worker/forklift stand points)."}
 
     resource_types = [
         {"id": "forklift", "speed": 2.2, "speedLoaded": 1.8, "capacity": 1, "capUnit": "PLT", "turnRadius": 2.1, "color": "#e3a21a", "src": E},
@@ -310,11 +324,11 @@ def build():
         res("FL-PA-4", "forklift", "Forklift PA-4", "Forklift Driver", "RM Feeding", "pa-feed", "A", [134, 28], "B", "PA-RM"),
         res("PJ-1", "palletJack", "Pallet Jack 1", "Material Handler", "RM Feeding", "pa-handover", "A", [147, 31], "A", "PA-HO"),
         res("PJ-2", "palletJack", "Pallet Jack 2", "Material Handler", "RM Feeding", "pa-handover", "A", [147, 31], "B", "PA-HO"),
-        res("PK-1", "worker", "Packer 1", "Packer", "Packing", "idLabel", "B", [168, 71.8], "A", "PA-PACK"),
+        res("PK-1", "worker", "Packer 1", "Packer", "Packing", "idLabel", "B", [172.5, 71.8], "A", "PA-PACK"),
         res("PK-2", "worker", "Packer 2", "Packer", "Packing", "inspect", "B", [163, 71.8], "A", "PA-PACK"),
         res("PK-3", "worker", "Packer 3", "Packer", "Packing", "shrink", "B", [157, 72.8], "A", "PA-PACK"),
         res("PK-4", "worker", "Packer 4", "Packer", "Packing", "stuff", "B", [146, 81.8], "A", "PA-PACK"),
-        res("PK-5", "worker", "Packer 5", "Packer", "Packing", "idLabel", "B", [168, 71.8], "B", "PA-PACK"),
+        res("PK-5", "worker", "Packer 5", "Packer", "Packing", "idLabel", "B", [172.5, 71.8], "B", "PA-PACK"),
         res("PK-6", "worker", "Packer 6", "Packer", "Packing", "inspect", "B", [163, 71.8], "B", "PA-PACK"),
         res("PK-7", "worker", "Packer 7", "Packer", "Packing", "shrink", "B", [157, 72.8], "B", "PA-PACK"),
         res("PK-8", "worker", "Packer 8", "Packer", "Packing", "stuff", "B", [146, 81.8], "B", "PA-PACK"),
@@ -377,8 +391,8 @@ def build():
             "packOption": "1 = one shrink wrapper (SHR-1); 2 = two wrappers (SHR-1 + SHR-2).",
             "volumeLevel": "0-4, index into volumes.levels (daily volume factor).",
             "equip": "Active AMR count per direction (1-3); resources gated by presetGated/gateIndex.",
-            "manualKitting": "true = RM is kitted by hand at the line handover (extra Material Handler time).",
-            "glSplit": "true = goods-to-line split: kitting moves to the Kitting Area (PA-KIT), handover only hands over kits.",
+            "manualKitting": "true = RM is kitted by hand at the line handover (kitManualSec); false = standard kitting at the handover (kitStdSec).",
+            "glSplit": "true = goods-to-line split: the line-feed forklift drops at the Kitting Area (PA-KIT), kitting there (kitSplitSec), then straight to the line.",
             "moveMetric": "Travel distance measured along corridors (approach -> corridor axis -> approach).",
             "lot": "Batch and lot granularity for lineage ids.",
         },
@@ -411,13 +425,13 @@ def build():
                  "version": VERSION, "seed": SEED, "generator": "tools/build_layout.py",
                  "srcTags": {F: "invented for this demo", E: "rough industry-typical guess", A: "modeling assumption"},
                  "note": "All names, numbers and layout are fictional.", "src": F},
-        "defaults": {"global": GLOBAL, "rackTypes": RACK_TYPES, "packing": PACKING},
+        "defaults": {"global": GLOBAL, "rackTypes": RACK_TYPES, "packing": PACKING, "handling": HANDLING},
         "modules": MODULES,
         "zones": [{"id": z[0], "module": z[1], "name": z[2], "cat": z[3], "rect": z[4], "capa": z[5],
                    "capaUnit": "PLT" if z[5] else None, "src": F} for z in ZONES],
         "rackRows": rack_rows, "floors": floors, "equipment": equipment, "docks": docks, "corridors": corridors,
         "items": items, "volumes": volumes, "resourceTypes": resource_types, "resources": resources,
-        "staffing": staffing, "staffingTotal": staffing_total, "packStations": pack_stations,
+        "staffing": staffing, "staffingTotal": staffing_total, "packStations": pack_stations, "points": points,
         "assumptions": assumptions, "presets": presets, "compareMetrics": compare_metrics, "idFormats": id_formats,
     }
     check(layout)
@@ -480,6 +494,11 @@ def check(L):
         for fid, rect, _ in fps:
             if pt_in(p["at"], rect):
                 errs.append(f"C5 pack point {p['id']} inside {fid}")
+    for k, p in L["points"].items():
+        if isinstance(p, list):
+            for fid, rect, _ in fps:
+                if pt_in(p, rect):
+                    errs.append(f"C5 point {k} inside {fid}")
     for r in L["resources"]:
         for fid, rect, _ in fps:
             if pt_in(r["home"], rect):
@@ -528,9 +547,9 @@ def selftest():
     cases = {
         "C1": lambda L: next(z for z in L["zones"] if z["id"] == "PA-RM").__setitem__("capa", 500),  # 560 vs 500
         "C2": lambda L: L["resources"].pop(0),                                                 # one driver missing
-        "C3": lambda L: L["equipment"][1].__setitem__("rect", [160, 68, 163, 71]),           # TBL-ID onto TBL-INS
+        "C3": lambda L: L["equipment"][1].__setitem__("rect", [160, 68, 163, 71]),           # TBL-ID onto TBL-INS (overlap)
         "C4": lambda L: L["corridors"].append({"id": "C-BAD", "module": "PA", "axis": "x", "at": 69, "from": 150, "to": 170}),
-        "C5": lambda L: L["packStations"]["points"][1].__setitem__("at", [168, 69.5]),       # inside TBL-ID
+        "C5": lambda L: L["packStations"]["points"][1].__setitem__("at", [172.5, 69.5]),     # inside TBL-ID
         "C6": lambda L: L["docks"].append(dict(L["docks"][0])),
     }
     bad = []
