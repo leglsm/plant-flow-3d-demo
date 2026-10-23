@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plant Flow 3D</title>
+<meta name="description" content="Fictional plant material-flow 3D viewer with lot traceability (Ridgeway Cell Works, Plant A). All data is invented.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/style.css">
+<script src="src/safe-gamepad.js"></script>
+<script src="lib/babylon.js"></script>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="mark" aria-hidden="true"></span><span class="name">Ridgeway Cell Works · Plant A</span><span class="tag">fictional demo</span></div>
+</header>
+<main class="stage">
+  <canvas id="view" aria-label="3D view of the fictional plant"></canvas>
+  <div id="labels" class="labels" aria-hidden="true"></div>
+  <div id="loading" class="loading">Building the day…</div>
+  <div id="pick" class="pick" hidden></div>
+</main>
+<footer class="bar" id="bar">
+  <button id="play" class="btn" title="Play / pause (Space)" aria-label="Play or pause">❚❚</button>
+  <select id="speed" class="sel" title="Speed" aria-label="Playback speed">
+    <option value="1">1×</option><option value="10">10×</option><option value="60" selected>60×</option><option value="120">120×</option><option value="300">300×</option>
+  </select>
+  <input id="time" class="slider" type="range" min="0" max="86399" step="1" value="0" aria-label="Time of day">
+  <span id="clock" class="clock">00:00:00</span>
+  <div class="seg" role="group" aria-label="Camera">
+    <button class="btn on" data-cam="orbit">Orbit</button><button class="btn" data-cam="walk">Walk</button><button class="btn" data-cam="top">Top</button>
+  </div>
+</footer>
+<div id="err" class="err" hidden></div>
+<script type="module" src="src/app.js"></script>
+</body>
+</html>

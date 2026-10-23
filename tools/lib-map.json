@@ -1,0 +1,4 @@
+{
+  "lib/babylon.js": "node_modules/babylonjs/babylon.js",
+  "lib/babylon.LICENSE.md": "node_modules/babylonjs/license.md"
+}

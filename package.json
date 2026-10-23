@@ -2,14 +2,21 @@
   "name": "plant-flow-3d-demo",
   "version": "0.1.0",
   "private": true,
-  "description": "Plant Material Flow 3D Viewer with Lot Traceability — fictional demo (Ridgeway Cell Works, Plant A)",
+  "description": "Plant Material Flow 3D Viewer with Lot Traceability \u2014 fictional demo (Ridgeway Cell Works, Plant A)",
   "type": "module",
   "scripts": {
     "layout": "python3 tools/build_layout.py",
     "layout:check": "python3 tools/build_layout.py --check",
     "test": "node --test \"test/*.test.js\"",
-    "scrub": "python3 tools/scrub.py"
+    "scrub": "python3 tools/scrub.py",
+    "e2e": "python3 tools/e2e.py",
+    "serve": "python3 -m http.server 8000"
   },
   "author": "Daniel Lee",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@fontsource/ibm-plex-mono": "5.2.5",
+    "@fontsource/ibm-plex-sans": "5.2.5",
+    "babylonjs": "7.54.3"
+  }
 }
