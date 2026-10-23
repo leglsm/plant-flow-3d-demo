@@ -154,11 +154,19 @@ export function createScene(canvas, L, opts = {}) {
   const wipPools = Object.fromEntries(Object.keys(UNIT_SIZE).map((k) => [k, new Pool(scene, `wip-${k}`, mat(scene, `m-wip-${k}`, C.box[k]), 64)]));
   const yAt = surfaceHeights(L);
 
-  // trace marker (S4; used by T8)
+  // trace marker (S4/T8): white floor ring pulses + target blinks 0.4 s. Selection: amber ring.
   const marker = BB.MeshBuilder.CreateTorus('marker', { diameter: 2.4, thickness: 0.12, tessellation: 48 }, scene);
   marker.material = mat(scene, 'm-marker', C.marker, { emissive: 1 });
   marker.isPickable = false; marker.isVisible = false;
-  const markerState = { p: null, scale: 1 };
+  const blinkBox = BB.MeshBuilder.CreateBox('trace-blink', { size: 1 }, scene);
+  blinkBox.material = mat(scene, 'm-blink', C.marker, { emissive: 0.9, alpha: 0.55 });
+  blinkBox.isPickable = false; blinkBox.isVisible = false;
+  const selRing = BB.MeshBuilder.CreateTorus('sel-ring', { diameter: 2.0, thickness: 0.1, tessellation: 40 }, scene);
+  selRing.material = mat(scene, 'm-sel', '#ffb547', { emissive: 1 });
+  selRing.isPickable = false; selRing.isVisible = false;
+  // trace: {obj, kind} from the caller for time t (same clock as everything else -> R2/R11)
+  const trace = { fn: null, cur: null, pos: null, scale: 1, blinkActor: null, follow: false, onFollowOff: null };
+  const sel = { obj: null, pos: null };
 
   // ---------------- cameras ----------------
   const cams = makeCameras(scene, canvas, site, ground);
@@ -166,6 +174,7 @@ export function createScene(canvas, L, opts = {}) {
   // ---------------- labels (DOM overlay) ----------------
   const labelLayer = opts.labelLayer || null;
   const zoneLabels = [];
+  const resLabels = new Map(); // id -> {el}
   if (labelLayer) {
     for (const z of L.zones) {
       const el = document.createElement('div');
@@ -174,6 +183,17 @@ export function createScene(canvas, L, opts = {}) {
       labelLayer.appendChild(el);
       zoneLabels.push({ el, p: new BB.Vector3((z.rect[0] + z.rect[2]) / 2, 0.5, (z.rect[1] + z.rect[3]) / 2) });
     }
+  }
+
+  // dragging the view while following a trace hands the camera back to the user
+  {
+    let down = null;
+    canvas.addEventListener('pointerdown', (e) => { down = [e.clientX, e.clientY]; });
+    canvas.addEventListener('pointermove', (e) => {
+      if (!down || !trace.follow || !e.buttons) return;
+      if (Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 6) { trace.follow = false; if (trace.onFollowOff) trace.onFollowOff(); }
+    });
+    window.addEventListener('pointerup', () => { down = null; });
   }
 
   // ---------------- picking ----------------
@@ -219,11 +239,21 @@ export function createScene(canvas, L, opts = {}) {
     st.wipKey = '';
     for (const a of st.actors.values()) a.root.dispose(false, true);
     st.actors.clear();
+    for (const l of resLabels.values()) l.el.remove();
+    resLabels.clear();
     for (const [id, track] of Object.entries(R.tracks)) {
       const res = R.resources[id];
       if (res.type === 'machine') { st.actors.set(id, { id, res, track, machine: true, mesh: equipMeshes.get(id), root: { dispose() {} } }); continue; }
       st.actors.set(id, buildActor(scene, id, res, track, L));
+      if (labelLayer) {
+        const el = document.createElement('div');
+        el.className = 'lbl lbl-res'; el.textContent = res.name;
+        labelLayer.appendChild(el);
+        resLabels.set(id, { el });
+      }
     }
+    trace.blinkActor = null;
+    refreshEnabled();
     // inactive equipment (e.g. 2nd shrink wrapper) is drawn faded
     for (const [id, m] of equipMeshes) {
       const active = id !== 'SHR-2' || R.assumptions.packOption === 2;
@@ -238,9 +268,11 @@ export function createScene(canvas, L, opts = {}) {
     const R = st.R;
     if (!R) return;
     // resources
+    let moving = 0, working = 0;
     for (const a of st.actors.values()) {
       const s = evalTrack(a.track, t);
       a.state = s;
+      if (!a.machine && s.seg) { if (s.moving) moving++; else working++; }
       if (a.machine) {
         if (a.mesh) a.mesh.material.emissiveColor = s.seg && s.phase === 'work' ? col3(C.work).scale(0.35) : BB.Color3.Black();
         continue;
@@ -250,6 +282,7 @@ export function createScene(canvas, L, opts = {}) {
       a.root.rotation.y = a.res.type === 'truck' && !s.moving ? (s.p[0] < st.roadMid ? Math.PI / 2 : -Math.PI / 2) : s.heading;
       setCarry(a, carryOf(R, a.id, s), s);
     }
+    st.activity = { moving, working };
     // pallets in slots
     const occ = st.occ.at(t);
     if (force || st.occVersion !== st.occ.version) {
@@ -291,8 +324,81 @@ export function createScene(canvas, L, opts = {}) {
       }
       for (const [k, pool] of Object.entries(wipPools)) pool.set(lists[k]);
     }
-    if (markerState.p) {
-      marker.position.set(markerState.p[0], 0.08, markerState.p[1]);
+    updateTargets(t);
+  }
+
+  /** World position of a lineage obj at the current state (actors already placed for t). */
+  function objPos(obj) {
+    if (!obj) return null;
+    if (obj.type === 'res') {
+      const a = st.actors.get(obj.id);
+      if (!a) return null;
+      if (a.machine) return a.mesh ? { p: [a.mesh.position.x, a.mesh.position.z], y: 0, res: a } : null;
+      return { p: [a.root.position.x, a.root.position.z], y: 0, res: a };
+    }
+    if (obj.type === 'pal') { const s = st.slots[slotIndex.get(obj.id)]; return s ? { p: [s.x, s.z], y: s.y, slot: s } : null; }
+    if (obj.type === 'pt') return { p: [obj.p[0], obj.p[1]], y: yAt(obj.p) };
+    return null;
+  }
+
+  function updateTargets(t) {
+    // trace target
+    const cur = trace.fn ? trace.fn(t) : null;
+    trace.cur = cur;
+    const tp = cur ? objPos(cur.obj) : null;
+    trace.pos = tp ? tp.p : null;
+    if (trace.blinkActor && (!tp || tp.res !== trace.blinkActor)) { setActorVisible(trace.blinkActor, true); trace.blinkActor = null; }
+    if (tp) {
+      const truck = tp.res && tp.res.res && tp.res.res.type === 'truck';
+      trace.scale = truck ? 4 : (cur.kind === 'rmPallet' || cur.kind === 'largeBox') ? 1.3 : 1;
+      marker.position.set(tp.p[0], 0.08, tp.p[1]);
+      marker.isVisible = true;
+      if (tp.res) { blinkBox.isVisible = false; trace.blinkActor = tp.res.machine ? null : tp.res; trace.blinkBoxOn = false; }
+      else {
+        const [w, d, h] = UNIT_SIZE[cur.kind] || UNIT_SIZE.smallBox;
+        blinkBox.scaling.set(w + 0.12, h + 0.12, d + 0.12);
+        blinkBox.position.set(tp.p[0], tp.y + h / 2 + (tp.slot && tp.slot.kind === 'rack' && tp.slot.level > 1 ? 0.06 : 0) + 0.07, tp.p[1]);
+        trace.blinkBoxOn = true;
+      }
+      if (trace.follow) cams.follow(tp.p);
+    } else { marker.isVisible = false; blinkBox.isVisible = false; trace.blinkBoxOn = false; }
+    // selection ring
+    const sp = sel.obj ? objPos(sel.obj) : null;
+    sel.pos = sp ? sp.p : null;
+    selRing.isVisible = !!sp;
+    if (sp) selRing.position.set(sp.p[0], (sp.slot ? sp.y : 0) + 0.1, sp.p[1]);
+  }
+
+  function setActorVisible(a, on) {
+    for (const m of a.root.getChildMeshes()) if (m !== a.carry) m.isVisible = on;
+  }
+
+  // ---------------- layers & flows (F-05) ----------------
+  const layerState = { racks: true, pallets: true, wip: true, zones: true, walls: true, equipment: true, resources: true };
+  const flowState = { A: true, B: true };
+  const layerOf = (name) => {
+    if (/^(rack-|rackpick-)/.test(name)) return 'racks';
+    if (/^pal-/.test(name)) return 'pallets';
+    if (/^wip-/.test(name)) return 'wip';
+    if (/^(zone-|zl-|floor-slots|corridor-paint|dock-plates)/.test(name)) return 'zones';
+    if (/^(wall-|door-|wl-|wb-)/.test(name)) return 'walls';
+    if (/^(eq-|asrs-shelves)/.test(name)) return 'equipment';
+    return null;
+  };
+  const flowOfMesh = (name) => (name === 'pal-rm' || name === 'wip-rmPallet' ? 'A' : name === 'pal-fg' || /^wip-/.test(name) ? 'B' : null);
+  function refreshEnabled() {
+    for (const m of scene.meshes) {
+      const l = layerOf(m.name);
+      if (!l) continue;
+      const f = flowOfMesh(m.name);
+      m.setEnabled(layerState[l] && (!f || flowState[f]));
+    }
+    for (const a of st.actors.values()) {
+      if (a.machine) continue;
+      const f = a.res.flow;
+      const on = layerState.resources && (!f || flowState[f] !== false);
+      a.root.setEnabled(on);
+      a.hidden = !on;
     }
   }
 
@@ -324,10 +430,15 @@ export function createScene(canvas, L, opts = {}) {
   engine.runRenderLoop(() => {
     if (!ready.v) return; // no state updates before the scene is ready (handoff lesson)
     if (opts.beforeFrame) opts.beforeFrame(engine.getDeltaTime() / 1000);
-    if (markerState.p) {
-      const k = 1 + 0.25 * Math.sin(performance.now() / 160);
-      marker.scaling.set(k * markerState.scale, 1, k * markerState.scale);
+    if (marker.isVisible) {
+      const now = performance.now();
+      const k = 1 + 0.25 * Math.sin(now / 160);
+      marker.scaling.set(k * trace.scale, 1, k * trace.scale);
+      const on = Math.floor(now / 400) % 2 === 0; // 0.4 s blink
+      blinkBox.isVisible = trace.blinkBoxOn && on;
+      if (trace.blinkActor) setActorVisible(trace.blinkActor, on);
     }
+    if (selRing.isVisible) selRing.scaling.set(1, 1, 1);
     updateLabels();
     scene.render();
   });
@@ -336,9 +447,9 @@ export function createScene(canvas, L, opts = {}) {
 
   function updateLabels() {
     if (!labelLayer) return;
-    const show = st.labels;
-    labelLayer.style.display = show ? '' : 'none';
-    if (!show) return;
+    const mode = st.labels === true ? 'zones' : st.labels || 'off';
+    labelLayer.style.display = mode === 'off' ? 'none' : '';
+    if (mode === 'off') return;
     const cam = scene.activeCamera;
     const w = engine.getRenderWidth(), h = engine.getRenderHeight();
     const vp = cam.viewport.toGlobal(w, h);
@@ -349,6 +460,17 @@ export function createScene(canvas, L, opts = {}) {
       const vis = v.z > 0 && v.z < 1 && v.x > -50 && v.x < w + 50 && v.y > -20 && v.y < h + 20;
       z.el.style.display = vis ? '' : 'none';
       if (vis) z.el.style.transform = `translate(${(v.x * sx).toFixed(1)}px, ${(v.y * sy).toFixed(1)}px) translate(-50%, -50%)`;
+    }
+    const tmp = new BB.Vector3();
+    for (const [id, l] of resLabels) {
+      const a = st.actors.get(id);
+      const show = mode === 'all' && a && !a.hidden;
+      if (!show) { l.el.style.display = 'none'; continue; }
+      tmp.set(a.root.position.x, a.res.type === 'truck' ? 4.2 : 2.4, a.root.position.z);
+      const v = BB.Vector3.Project(tmp, BB.Matrix.IdentityReadOnly, tm, vp);
+      const vis = v.z > 0 && v.z < 1 && v.x > -50 && v.x < w + 50 && v.y > -20 && v.y < h + 20;
+      l.el.style.display = vis ? '' : 'none';
+      if (vis) l.el.style.transform = `translate(${(v.x * sx).toFixed(1)}px, ${(v.y * sy).toFixed(1)}px) translate(-50%, -100%)`;
     }
   }
 
@@ -362,9 +484,19 @@ export function createScene(canvas, L, opts = {}) {
     setCamera: (mode) => cams.set(mode),
     get cameraMode() { return cams.mode; },
     focus: (p, opt) => cams.focus(p, opt),
-    setLabels: (on) => { st.labels = !!on; },
+    /** 'zones' | 'all' | 'off' (true = 'zones', false = 'off'). */
+    setLabels: (mode) => { st.labels = mode === true ? 'zones' : mode === false ? 'off' : mode; },
     set onPick(fn) { st.onPick = fn || (() => {}); },
-    setMarker(p, scale = 1) { markerState.p = p; markerState.scale = scale; marker.isVisible = !!p; if (p) marker.position.set(p[0], 0.08, p[1]); },
+    setLayer(name, on) { if (!(name in layerState)) throw new Error(`unknown layer ${name}`); layerState[name] = !!on; refreshEnabled(); },
+    setFlow(flow, on) { if (!(flow in flowState)) throw new Error(`unknown flow ${flow}`); flowState[flow] = !!on; refreshEnabled(); },
+    /** fn(t) -> {obj, kind} | null. Evaluated in the same frame step as the actors (shared clock). */
+    setTrace(fn) { trace.fn = fn; updateTargets(st.t); },
+    setFollow(on, onOff) { trace.follow = !!on; trace.onFollowOff = onOff || trace.onFollowOff; if (on) updateTargets(st.t); },
+    get following() { return trace.follow; },
+    traceInfo() { return { cur: trace.cur, markerPos: marker.isVisible ? [marker.position.x, marker.position.z] : null, cameraTarget: cams.target() }; },
+    setSelection(obj) { sel.obj = obj; updateTargets(st.t); },
+    objPos: (obj) => { const r = objPos(obj); return r ? r.p : null; },
+    activity: () => st.activity || { moving: 0, working: 0 },
     /** world position [x, z] of a resource mesh (e2e / trace check). */
     actorPos(id) { const a = st.actors.get(id); if (!a) return null; if (a.machine) return a.mesh ? [a.mesh.position.x, a.mesh.position.z] : null; return [a.root.position.x, a.root.position.z]; },
     actorState(id) { const a = st.actors.get(id); return a ? a.state : null; },
@@ -726,6 +858,25 @@ function makeCameras(scene, canvas, site, ground) {
     if (st.mode === 'orbit' && radius) orbit.radius = Math.min(orbit.radius, radius * 3);
   }
 
+  /** Follow a point every frame (trace): exact, no easing, so it matches the shared clock. */
+  function follow(p) {
+    if (st.mode === 'orbit') {
+      if (orbit.animations && orbit.animations.length) { scene.stopAnimation(orbit); orbit.animations = []; }
+      orbit.target.set(p[0], 0, p[1]);
+    } else if (st.mode === 'top') { top.position.x = p[0]; top.position.z = p[1]; }
+    else {
+      if (walk.animations && walk.animations.length) { scene.stopAnimation(walk); walk.animations = []; }
+      const dir = walk.getDirection(BB.Axis.Z); dir.y = 0; if (dir.length() < 1e-3) dir.set(0, 0, 1); dir.normalize();
+      walk.position.set(p[0] - dir.x * 10, 1.7, p[1] - dir.z * 10);
+    }
+  }
+  function target() {
+    if (st.mode === 'orbit') return [orbit.target.x, orbit.target.z];
+    if (st.mode === 'top') return [top.position.x, top.position.z];
+    const dir = walk.getDirection(BB.Axis.Z); dir.y = 0; dir.normalize();
+    return [walk.position.x + dir.x * 10, walk.position.z + dir.z * 10];
+  }
+
   topBounds();
-  return { set, focus, get mode() { return st.mode; }, resize: topBounds, orbit, walk, top };
+  return { set, focus, follow, target, get mode() { return st.mode; }, resize: topBounds, orbit, walk, top };
 }

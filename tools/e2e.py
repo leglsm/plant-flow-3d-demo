@@ -138,6 +138,90 @@ def main():
         check(not pg.evaluate('document.body.innerText.includes("null")'), 'no "null" on screen')
         pg.close()
 
+        # ---- T7: tabs, side panel, flows, selection ----
+        pg2, _ = open_page(b, url, 1400, 860, errors)
+        pg2.evaluate('window.__pf.setPlaying(false); window.__pf.setTime(37800)')
+        pg2.keyboard.press('m'); pg2.wait_for_timeout(100)
+        check(pg2.evaluate('document.querySelector("#side").classList.contains("closed")'), 'M hides the side panel')
+        pg2.keyboard.press('m'); pg2.wait_for_timeout(100)
+        pg2.uncheck('[data-flow=A]')
+        check(not pg2.evaluate('window.__pf.view.scene.getMeshByName("pal-rm").isEnabled()') and pg2.evaluate('window.__pf.view.scene.getMeshByName("pal-fg").isEnabled()'), 'flow A off hides raw-material pallets only')
+        pg2.check('[data-flow=A]')
+        pg2.click('[data-res="FL-PA-3"]'); pg2.wait_for_timeout(300)
+        check('Forklift PA-3' in pg2.inner_text('#sel'), 'selection panel shows the clicked resource (F-06)')
+        nt = pg2.evaluate('(async () => { const { nextTaskAt } = await import("./src/metrics.js"); return nextTaskAt(window.__pf.R, "FL-PA-3", window.__pf.t); })()')
+        pg2.click('#sel [data-act=goto]'); pg2.wait_for_timeout(150)
+        check(abs(pg2.evaluate('window.__pf.t') - nt) < 1e-6, f'"next task" jumps the clock to {nt}')
+        pg2.click('#units'); pg2.wait_for_timeout(300)
+        check(' ft' in pg2.inner_text('#sel'), 'units switch to ft')
+        pg2.click('#units')
+        pg2.keyboard.press('Escape'); pg2.wait_for_timeout(100)
+        check(pg2.evaluate('document.querySelector("#sel").hidden'), 'Esc closes the selection')
+        pg2.screenshot(path=os.path.join(TMP, 't7-ops.png'))
+
+        # ---- T8: lot trace rides the shared clock (D-34) ----
+        pg2.click('[data-tab=trace]')
+        for k in ['rawMaterial', 'largeBox', 'midBox']:
+            ex = pg2.evaluate(f'window.__pf.R.examples.{k}')
+            pg2.fill('#trace-q', ex); pg2.press('#trace-q', 'Enter'); pg2.wait_for_timeout(200)
+            r = pg2.evaluate('''(() => {
+              const P = window.__pf, tr = P.trace.active; P.setPlaying(false);
+              let bad = 0, cam = 0, n = 0, ids = new Set();
+              const times = []; for (const e of tr.timeline) times.push(e.t + 0.5);
+              for (let i = 1; i < tr.timeline.length; i++) times.push((tr.timeline[i - 1].t + tr.timeline[i].t) / 2);
+              for (const t of times.concat(times.slice().reverse())) {
+                P.setTime(t);
+                const info = P.view.traceInfo();
+                const want = P.R.positionOf(info.cur.obj, P.t);
+                if (!info.markerPos || Math.hypot(info.markerPos[0] - want[0], info.markerPos[1] - want[1]) > 1e-9) bad++;
+                if (P.view.following && Math.hypot(info.cameraTarget[0] - info.markerPos[0], info.cameraTarget[1] - info.markerPos[1]) > 1e-9) cam++;
+                n++;
+              }
+              for (const e of tr.timeline) ids.add(e.t + '|' + e.unit + '|' + e.step);
+              return { bad, cam, n, events: tr.timeline.length, dup: tr.timeline.length - ids.size, following: P.view.following, steps: [...new Set(tr.timeline.map((e) => e.step))].length };
+            })()''')
+            check(r['bad'] == 0 and r['cam'] == 0 and r['following'] and r['dup'] == 0,
+                  f"trace {k} ({ex}): marker = trace position, camera on target at {r['n']} scrubbed times, {r['events']} events, {r['steps']} steps, no duplicates")
+        # replay follows the bar speed: 300x for ~1 s of real time
+        pg2.select_option('#speed', '300')
+        pg2.click('[data-act=play]'); pg2.wait_for_timeout(100)
+        t0 = pg2.evaluate('window.__pf.t'); pg2.wait_for_timeout(1000); t1 = pg2.evaluate('window.__pf.t')
+        info = pg2.evaluate('window.__pf.view.traceInfo()')
+        moved = t1 - t0
+        check(150 < moved < 450 and pg2.evaluate('window.__pf.playing'), f'replay runs at the bar speed (300x: {moved:.0f} s in ~1 s)')
+        check(info['markerPos'] and abs(info['cameraTarget'][0] - info['markerPos'][0]) < 1e-9 and abs(info['cameraTarget'][1] - info['markerPos'][1]) < 1e-9, 'camera stays on the target while playing')
+        pg2.select_option('#speed', '60')
+        pg2.wait_for_timeout(300)
+        s1 = pg2.evaluate('window.__pf.t'); pg2.wait_for_timeout(1000); s2 = pg2.evaluate('window.__pf.t')
+        check(30 < s2 - s1 < 90, f'speed change applies to the running replay (60x: {s2 - s1:.0f} s in ~1 s)')
+        # scrubbing the bottom slider moves marker and camera with it
+        pg2.evaluate('window.__pf.setPlaying(false)')
+        tl = pg2.evaluate('window.__pf.trace.active.timeline.map(e => e.t)')
+        mid = int((tl[0] + tl[-1]) / 2)
+        pg2.evaluate(f'(() => {{ const s = document.querySelector("#time"); s.value = "{mid}"; s.dispatchEvent(new Event("input")); }})()')
+        pg2.wait_for_timeout(150)
+        info = pg2.evaluate('window.__pf.view.traceInfo()')
+        want = pg2.evaluate('window.__pf.R.positionOf(window.__pf.view.traceInfo().cur.obj, window.__pf.t)')
+        check(abs(pg2.evaluate('window.__pf.t') - mid) < 1 and abs(info['markerPos'][0] - want[0]) < 1e-9 and abs(info['cameraTarget'][1] - want[1]) < 1e-9, 'time slider scrub moves marker + camera')
+        # replay pauses at the end of the timeline
+        pg2.evaluate(f'window.__pf.setTime({tl[-1]} - 2); window.__pf.setPlaying(true)')
+        pg2.evaluate('window.__pf.trace.open(window.__pf.trace.active.query)')  # restart run bookkeeping
+        pg2.evaluate(f'window.__pf.setTime({tl[-1]} + 1)')
+        pg2.wait_for_timeout(1000)
+        check(not pg2.evaluate('window.__pf.playing'), 'replay pauses after the last event')
+        pg2.screenshot(path=os.path.join(DOCS, 't8-trace.png'))
+        # dragging the view frees the camera
+        pg2.click('[data-act=follow]'); pg2.wait_for_timeout(100)
+        pg2.mouse.move(900, 400); pg2.mouse.down(); pg2.mouse.move(980, 430, steps=6); pg2.mouse.up()
+        check(not pg2.evaluate('window.__pf.view.following'), 'dragging the view stops following')
+        # unknown id
+        pg2.fill('#trace-q', 'LBX-9999'); pg2.press('#trace-q', 'Enter'); pg2.wait_for_timeout(150)
+        txt = pg2.inner_text('#pane-trace')
+        chips = pg2.evaluate('document.querySelectorAll("#trace-out .chip").length')
+        check('No match' in txt and 'Large box' in txt and chips == 3, 'unknown ID: "No match" + 3 IDs of the same kind')
+        check(not pg2.evaluate('document.body.innerText.includes("null") || document.body.innerText.includes("undefined")'), 'no "null"/"undefined" on screen (T7/T8)')
+        pg2.close()
+
         pg, _ = open_page(b, url, 390, 800, errors)
         pg.wait_for_timeout(500)
         sw = pg.evaluate('document.documentElement.scrollWidth')

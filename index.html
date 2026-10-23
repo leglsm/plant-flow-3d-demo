@@ -15,23 +15,40 @@
 <body>
 <header class="top">
   <div class="brand"><span class="mark" aria-hidden="true"></span><span class="name">Ridgeway Cell Works · Plant A</span><span class="tag">fictional demo</span></div>
+  <nav class="tabs" role="tablist" aria-label="Views">
+    <button role="tab" class="tab on" data-tab="ops" aria-selected="true">3D Operations</button>
+    <button role="tab" class="tab" data-tab="trace" aria-selected="false">Lot Trace</button>
+    <button role="tab" class="tab" data-tab="analysis" aria-selected="false">Analysis</button>
+    <button role="tab" class="tab" data-tab="settings" aria-selected="false">Settings</button>
+  </nav>
 </header>
 <main class="stage">
   <canvas id="view" aria-label="3D view of the fictional plant"></canvas>
   <div id="labels" class="labels" aria-hidden="true"></div>
   <div id="loading" class="loading">Building the day…</div>
-  <div id="pick" class="pick" hidden></div>
+  <aside id="side" class="side" aria-label="Panel">
+    <div class="side-head"><span id="side-title">3D Operations</span><button id="side-close" class="icon" title="Hide panel (M)" aria-label="Hide panel">‹</button></div>
+    <section class="pane on" data-pane="ops" id="pane-ops"></section>
+    <section class="pane" data-pane="trace" id="pane-trace"></section>
+    <section class="pane" data-pane="analysis" id="pane-analysis"><p class="muted">Analysis (heat map, dwell, utilization, volume scenarios) is the next step of this build.</p></section>
+    <section class="pane" data-pane="settings" id="pane-settings"><p class="muted">Settings (assumptions, sources, AS-WAS / AS-IS / TO-BE compare) is the next step of this build.</p></section>
+  </aside>
+  <button id="side-open" class="side-open" title="Show panel (M)" aria-label="Show panel" hidden>›</button>
+  <section id="sel" class="sel-panel" hidden aria-live="polite"></section>
 </main>
 <footer class="bar" id="bar">
   <button id="play" class="btn" title="Play / pause (Space)" aria-label="Play or pause">❚❚</button>
   <select id="speed" class="sel" title="Speed" aria-label="Playback speed">
-    <option value="1">1×</option><option value="10">10×</option><option value="60" selected>60×</option><option value="120">120×</option><option value="300">300×</option>
+    <option value="1">1×</option><option value="10">10×</option><option value="30">30×</option><option value="60" selected>60×</option><option value="120">120×</option><option value="300">300×</option>
   </select>
-  <input id="time" class="slider" type="range" min="0" max="86399" step="1" value="0" aria-label="Time of day">
+  <div class="scrub"><input id="time" class="slider" type="range" min="0" max="86399" step="1" value="0" aria-label="Time of day"><div class="shifts" aria-hidden="true"><span>B</span><span>Shift A 06–18</span><span>Shift B</span></div></div>
   <span id="clock" class="clock">00:00:00</span>
+  <span id="phase" class="phase" title="Current shift and activity"></span>
   <div class="seg" role="group" aria-label="Camera">
-    <button class="btn on" data-cam="orbit">Orbit</button><button class="btn" data-cam="walk">Walk</button><button class="btn" data-cam="top">Top</button>
+    <button class="btn on" data-cam="orbit" title="Orbit: left-drag pan, right-drag rotate, wheel zoom">Orbit</button><button class="btn" data-cam="walk" title="Walk: WASD, drag to look, wheel ±2 m (Shift 8 m), double-click to walk">Walk</button><button class="btn" data-cam="top" title="Top view: drag to pan, wheel to zoom">Top</button>
   </div>
+  <select id="labelsel" class="sel" title="Labels" aria-label="Labels"><option value="zones" selected>Labels: zones</option><option value="all">Labels: all</option><option value="off">Labels: off</option></select>
+  <button id="units" class="btn" title="Units" aria-label="Switch units">m</button>
 </footer>
 <div id="err" class="err" hidden></div>
 <script type="module" src="src/app.js"></script>
