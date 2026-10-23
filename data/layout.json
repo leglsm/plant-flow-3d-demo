@@ -1,0 +1,2636 @@
+{
+ "meta": {
+  "name": "Ridgeway Cell Works - Plant A",
+  "fictional": true,
+  "units": "m",
+  "coords": {
+   "origin": "bottom-left",
+   "x": "east",
+   "z": "north",
+   "y": "up"
+  },
+  "version": "0.1.0",
+  "seed": 20261023,
+  "generator": "tools/build_layout.py",
+  "srcTags": {
+   "fictional": "invented for this demo",
+   "estimate": "rough industry-typical guess",
+   "assumption": "modeling assumption"
+  },
+  "note": "All names, numbers and layout are fictional.",
+  "src": "fictional"
+ },
+ "defaults": {
+  "global": {
+   "aisleWidth": 3.5,
+   "pallet": {
+    "w": 1.2,
+    "d": 1.0,
+    "h": 1.2
+   },
+   "slotClearance": 0.1,
+   "src": "assumption"
+  },
+  "rackTypes": {
+   "selective": {
+    "bayWidth": 2.7,
+    "depth": 1.1,
+    "levels": 4,
+    "beamPitch": 1.6,
+    "palletsPerBay": 2,
+    "src": "estimate"
+   },
+   "highbay": {
+    "bayWidth": 2.8,
+    "depth": 1.2,
+    "levels": 6,
+    "beamPitch": 1.5,
+    "palletsPerBay": 2,
+    "src": "estimate"
+   }
+  },
+  "packing": {
+   "cellsPerSmall": 300,
+   "smallPerMid": 4,
+   "midPerLarge": 24,
+   "smallPerFlatCart": 16,
+   "magazinesPerAmrCart": 8,
+   "emptyMagPerCart": 20,
+   "cellsPerMagazine": 300,
+   "src": "fictional"
+  }
+ },
+ "modules": [
+  {
+   "id": "OW",
+   "name": "Offsite Warehouse",
+   "rect": [
+    0,
+    0,
+    64,
+    50
+   ],
+   "wallH": 9,
+   "color": "#8a94a6",
+   "src": "fictional"
+  },
+  {
+   "id": "ROAD",
+   "name": "Shuttle Road (shortened)",
+   "rect": [
+    64,
+    30,
+    100,
+    48
+   ],
+   "wallH": 0,
+   "color": "#5b6270",
+   "note": "Visual distance is shortened; travel time comes from volumes.shuttle.travelMin.",
+   "src": "fictional"
+  },
+  {
+   "id": "PA",
+   "name": "Plant A",
+   "rect": [
+    100,
+    0,
+    220,
+    90
+   ],
+   "wallH": 12,
+   "color": "#9aa3b2",
+   "src": "fictional"
+  }
+ ],
+ "zones": [
+  {
+   "id": "OW-RCV",
+   "module": "OW",
+   "name": "Offsite Receiving",
+   "cat": "ow",
+   "rect": [
+    2,
+    34,
+    20,
+    48
+   ],
+   "capa": 24,
+   "capaUnit": "PLT",
+   "src": "fictional",
+   "capaCalc": 24
+  },
+  {
+   "id": "OW-QI",
+   "module": "OW",
+   "name": "Quality Hold",
+   "cat": "ow",
+   "rect": [
+    22,
+    34,
+    46,
+    48
+   ],
+   "capa": 30,
+   "capaUnit": "PLT",
+   "src": "fictional",
+   "capaCalc": 32
+  },
+  {
+   "id": "OW-STO",
+   "module": "OW",
+   "name": "Offsite Storage",
+   "cat": "ow",
+   "rect": [
+    2,
+    4,
+    48,
+    30
+   ],
+   "capa": 1000,
+   "capaUnit": "PLT",
+   "src": "fictional",
+   "capaCalc": 1024
+  },
+  {
+   "id": "OW-STG",
+   "module": "OW",
+   "name": "Shuttle Staging",
+   "cat": "ow",
+   "rect": [
+    53,
+    4,
+    63,
+    28
+   ],
+   "capa": 32,
+   "capaUnit": "PLT",
+   "src": "fictional",
+   "capaCalc": 32
+  },
+  {
+   "id": "PA-DOCK",
+   "module": "PA",
+   "name": "Plant Dock",
+   "cat": "rcv",
+   "rect": [
+    102,
+    32,
+    116,
+    48
+   ],
+   "capa": 20,
+   "capaUnit": "PLT",
+   "src": "fictional",
+   "capaCalc": 20
+  },
+  {
+   "id": "PA-IQC",
+   "module": "PA",
+   "name": "Label & Incoming Inspection",
+   "cat": "rcv",
+   "rect": [
+    118,
+    32,
+    132,
+    48
+   ],
+   "capa": 20,
+   "capaUnit": "PLT",
+   "src": "fictional",
+   "capaCalc": 20
+  },
+  {
+   "id": "PA-RM",
+   "module": "PA",
+   "name": "Raw Material Racks",
+   "cat": "sto",
+   "rect": [
+    102,
+    4,
+    132,
+    27
+   ],
+   "capa": 560,
+   "capaUnit": "PLT",
+   "src": "fictional",
+   "capaCalc": 560
+  },
+  {
+   "id": "PA-HO",
+   "module": "PA",
+   "name": "Line Handover",
+   "cat": "cell",
+   "rect": [
+    136,
+    32,
+    146,
+    44
+   ],
+   "capa": 12,
+   "capaUnit": "PLT",
+   "src": "fictional",
+   "capaCalc": 12
+  },
+  {
+   "id": "PA-KIT",
+   "module": "PA",
+   "name": "Kitting Area",
+   "cat": "cell",
+   "rect": [
+    148,
+    10,
+    166,
+    26
+   ],
+   "capa": null,
+   "capaUnit": null,
+   "src": "fictional",
+   "capaCalc": null
+  },
+  {
+   "id": "PA-CELL",
+   "module": "PA",
+   "name": "Cell Production (context)",
+   "cat": "ctx",
+   "rect": [
+    148,
+    32,
+    218,
+    58
+   ],
+   "capa": null,
+   "capaUnit": null,
+   "src": "fictional",
+   "capaCalc": null
+  },
+  {
+   "id": "PA-UNPK",
+   "module": "PA",
+   "name": "Unpack & Re-input",
+   "cat": "cell",
+   "rect": [
+    136,
+    46,
+    146,
+    58
+   ],
+   "capa": null,
+   "capaUnit": null,
+   "src": "fictional",
+   "capaCalc": null
+  },
+  {
+   "id": "PA-PACK",
+   "module": "PA",
+   "name": "Packing",
+   "cat": "cell",
+   "rect": [
+    136,
+    62,
+    172,
+    88
+   ],
+   "capa": null,
+   "capaUnit": null,
+   "src": "fictional",
+   "capaCalc": null
+  },
+  {
+   "id": "PA-ASRS",
+   "module": "PA",
+   "name": "Magazine AS/RS",
+   "cat": "cell",
+   "rect": [
+    174,
+    62,
+    198,
+    76
+   ],
+   "capa": null,
+   "capaUnit": null,
+   "src": "fictional",
+   "capaCalc": null
+  },
+  {
+   "id": "PA-OUT",
+   "module": "PA",
+   "name": "Next Process (context)",
+   "cat": "ctx",
+   "rect": [
+    200,
+    64,
+    218,
+    88
+   ],
+   "capa": null,
+   "capaUnit": null,
+   "src": "fictional",
+   "capaCalc": null
+  },
+  {
+   "id": "PA-FG",
+   "module": "PA",
+   "name": "Finished Goods High-bay",
+   "cat": "sto",
+   "rect": [
+    102,
+    62,
+    132,
+    88
+   ],
+   "capa": 750,
+   "capaUnit": "PLT",
+   "src": "fictional",
+   "capaCalc": 756
+  }
+ ],
+ "rackRows": [
+  {
+   "id": "OW-R01",
+   "zone": "OW-STO",
+   "type": "selective",
+   "along": "x",
+   "origin": [
+    4.0,
+    7.5
+   ],
+   "bays": 16,
+   "face": "S",
+   "area": "OW",
+   "row": 1,
+   "items": [
+    "RM-100101",
+    "RM-100102"
+   ],
+   "override": {},
+   "fill": 0.712,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "OW-R02",
+   "zone": "OW-STO",
+   "type": "selective",
+   "along": "x",
+   "origin": [
+    4.0,
+    8.6
+   ],
+   "bays": 16,
+   "face": "N",
+   "area": "OW",
+   "row": 2,
+   "items": [
+    "RM-100102",
+    "RM-100215"
+   ],
+   "override": {},
+   "fill": 0.781,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "OW-R03",
+   "zone": "OW-STO",
+   "type": "selective",
+   "along": "x",
+   "origin": [
+    4.0,
+    13.2
+   ],
+   "bays": 16,
+   "face": "S",
+   "area": "OW",
+   "row": 3,
+   "items": [
+    "RM-100215",
+    "RM-100330"
+   ],
+   "override": {},
+   "fill": 0.795,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "OW-R04",
+   "zone": "OW-STO",
+   "type": "selective",
+   "along": "x",
+   "origin": [
+    4.0,
+    14.3
+   ],
+   "bays": 16,
+   "face": "N",
+   "area": "OW",
+   "row": 4,
+   "items": [
+    "RM-100330",
+    "RM-100418"
+   ],
+   "override": {},
+   "fill": 0.704,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "OW-R05",
+   "zone": "OW-STO",
+   "type": "selective",
+   "along": "x",
+   "origin": [
+    4.0,
+    18.9
+   ],
+   "bays": 16,
+   "face": "S",
+   "area": "OW",
+   "row": 5,
+   "items": [
+    "RM-100418",
+    "RM-100422"
+   ],
+   "override": {},
+   "fill": 0.751,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "OW-R06",
+   "zone": "OW-STO",
+   "type": "selective",
+   "along": "x",
+   "origin": [
+    4.0,
+    20.0
+   ],
+   "bays": 16,
+   "face": "N",
+   "area": "OW",
+   "row": 6,
+   "items": [
+    "RM-100422",
+    "RM-100507"
+   ],
+   "override": {},
+   "fill": 0.762,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "OW-R07",
+   "zone": "OW-STO",
+   "type": "selective",
+   "along": "x",
+   "origin": [
+    4.0,
+    24.6
+   ],
+   "bays": 16,
+   "face": "S",
+   "area": "OW",
+   "row": 7,
+   "items": [
+    "RM-100507",
+    "RM-100611"
+   ],
+   "override": {},
+   "fill": 0.722,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "OW-R08",
+   "zone": "OW-STO",
+   "type": "selective",
+   "along": "x",
+   "origin": [
+    4.0,
+    25.7
+   ],
+   "bays": 16,
+   "face": "N",
+   "area": "OW",
+   "row": 8,
+   "items": [
+    "RM-100611",
+    "RM-100101"
+   ],
+   "override": {},
+   "fill": 0.739,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "RM-R01",
+   "zone": "PA-RM",
+   "type": "selective",
+   "along": "x",
+   "origin": [
+    104.0,
+    7.5
+   ],
+   "bays": 10,
+   "face": "S",
+   "area": "RM",
+   "row": 1,
+   "items": [
+    "RM-100101",
+    "RM-100102"
+   ],
+   "override": {},
+   "fill": 0.6,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "RM-R02",
+   "zone": "PA-RM",
+   "type": "selective",
+   "along": "x",
+   "origin": [
+    104.0,
+    8.6
+   ],
+   "bays": 10,
+   "face": "N",
+   "area": "RM",
+   "row": 2,
+   "items": [
+    "RM-100102",
+    "RM-100215"
+   ],
+   "override": {},
+   "fill": 0.632,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "RM-R03",
+   "zone": "PA-RM",
+   "type": "selective",
+   "along": "x",
+   "origin": [
+    104.0,
+    13.2
+   ],
+   "bays": 10,
+   "face": "S",
+   "area": "RM",
+   "row": 3,
+   "items": [
+    "RM-100215",
+    "RM-100330"
+   ],
+   "override": {},
+   "fill": 0.576,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "RM-R04",
+   "zone": "PA-RM",
+   "type": "selective",
+   "along": "x",
+   "origin": [
+    104.0,
+    14.3
+   ],
+   "bays": 10,
+   "face": "N",
+   "area": "RM",
+   "row": 4,
+   "items": [
+    "RM-100330",
+    "RM-100418"
+   ],
+   "override": {},
+   "fill": 0.601,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "RM-R05",
+   "zone": "PA-RM",
+   "type": "selective",
+   "along": "x",
+   "origin": [
+    104.0,
+    18.9
+   ],
+   "bays": 10,
+   "face": "S",
+   "area": "RM",
+   "row": 5,
+   "items": [
+    "RM-100418",
+    "RM-100422"
+   ],
+   "override": {},
+   "fill": 0.564,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "RM-R06",
+   "zone": "PA-RM",
+   "type": "selective",
+   "along": "x",
+   "origin": [
+    104.0,
+    20.0
+   ],
+   "bays": 10,
+   "face": "N",
+   "area": "RM",
+   "row": 6,
+   "items": [
+    "RM-100422",
+    "RM-100507"
+   ],
+   "override": {},
+   "fill": 0.583,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "RM-R07",
+   "zone": "PA-RM",
+   "type": "selective",
+   "along": "x",
+   "origin": [
+    104.0,
+    24.6
+   ],
+   "bays": 10,
+   "face": "S",
+   "area": "RM",
+   "row": 7,
+   "items": [
+    "RM-100507",
+    "RM-100611"
+   ],
+   "override": {},
+   "fill": 0.598,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "FG-R01",
+   "zone": "PA-FG",
+   "type": "highbay",
+   "along": "x",
+   "origin": [
+    104.0,
+    65.5
+   ],
+   "bays": 9,
+   "face": "S",
+   "area": "FG",
+   "row": 1,
+   "items": [
+    "FG-200101"
+   ],
+   "override": {},
+   "fill": 0.545,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "FG-R02",
+   "zone": "PA-FG",
+   "type": "highbay",
+   "along": "x",
+   "origin": [
+    104.0,
+    66.7
+   ],
+   "bays": 9,
+   "face": "N",
+   "area": "FG",
+   "row": 2,
+   "items": [
+    "FG-200102"
+   ],
+   "override": {},
+   "fill": 0.59,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "FG-R03",
+   "zone": "PA-FG",
+   "type": "highbay",
+   "along": "x",
+   "origin": [
+    104.0,
+    71.4
+   ],
+   "bays": 9,
+   "face": "S",
+   "area": "FG",
+   "row": 3,
+   "items": [
+    "FG-200201"
+   ],
+   "override": {},
+   "fill": 0.574,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "FG-R04",
+   "zone": "PA-FG",
+   "type": "highbay",
+   "along": "x",
+   "origin": [
+    104.0,
+    72.6
+   ],
+   "bays": 9,
+   "face": "N",
+   "area": "FG",
+   "row": 4,
+   "items": [
+    "FG-200101"
+   ],
+   "override": {},
+   "fill": 0.568,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "FG-R05",
+   "zone": "PA-FG",
+   "type": "highbay",
+   "along": "x",
+   "origin": [
+    104.0,
+    77.3
+   ],
+   "bays": 9,
+   "face": "S",
+   "area": "FG",
+   "row": 5,
+   "items": [
+    "FG-200102"
+   ],
+   "override": {},
+   "fill": 0.52,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "FG-R06",
+   "zone": "PA-FG",
+   "type": "highbay",
+   "along": "x",
+   "origin": [
+    104.0,
+    78.5
+   ],
+   "bays": 9,
+   "face": "N",
+   "area": "FG",
+   "row": 6,
+   "items": [
+    "FG-200201"
+   ],
+   "override": {},
+   "fill": 0.567,
+   "bay01": "east",
+   "src": "fictional"
+  },
+  {
+   "id": "FG-R07",
+   "zone": "PA-FG",
+   "type": "highbay",
+   "along": "x",
+   "origin": [
+    104.0,
+    83.2
+   ],
+   "bays": 9,
+   "face": "S",
+   "area": "FG",
+   "row": 7,
+   "items": [
+    "FG-200101"
+   ],
+   "override": {},
+   "fill": 0.569,
+   "bay01": "east",
+   "src": "fictional"
+  }
+ ],
+ "floors": [
+  {
+   "id": "FL-OW-RCV",
+   "zone": "OW-RCV",
+   "label": "RCV",
+   "origin": [
+    3,
+    35
+   ],
+   "cols": 6,
+   "rows": 4,
+   "pitch": [
+    2.6,
+    2.8
+   ],
+   "slot": [
+    1.2,
+    1.0
+   ],
+   "fill": 0.25,
+   "src": "fictional"
+  },
+  {
+   "id": "FL-OW-QI",
+   "zone": "OW-QI",
+   "label": "QI",
+   "origin": [
+    23,
+    35
+   ],
+   "cols": 8,
+   "rows": 4,
+   "pitch": [
+    2.6,
+    2.8
+   ],
+   "slot": [
+    1.2,
+    1.0
+   ],
+   "fill": 0.3,
+   "src": "fictional"
+  },
+  {
+   "id": "FL-OW-STG",
+   "zone": "OW-STG",
+   "label": "STG",
+   "origin": [
+    53.6,
+    5
+   ],
+   "cols": 4,
+   "rows": 8,
+   "pitch": [
+    2.3,
+    2.8
+   ],
+   "slot": [
+    1.2,
+    1.0
+   ],
+   "fill": 0.1,
+   "src": "fictional"
+  },
+  {
+   "id": "FL-PA-DOCK",
+   "zone": "PA-DOCK",
+   "label": "DCK",
+   "origin": [
+    103,
+    33
+   ],
+   "cols": 4,
+   "rows": 5,
+   "pitch": [
+    2.6,
+    2.8
+   ],
+   "slot": [
+    1.2,
+    1.0
+   ],
+   "fill": 0.0,
+   "src": "fictional"
+  },
+  {
+   "id": "FL-PA-IQC",
+   "zone": "PA-IQC",
+   "label": "IQC",
+   "origin": [
+    119,
+    33
+   ],
+   "cols": 4,
+   "rows": 5,
+   "pitch": [
+    2.6,
+    2.8
+   ],
+   "slot": [
+    1.2,
+    1.0
+   ],
+   "fill": 0.2,
+   "src": "fictional"
+  },
+  {
+   "id": "FL-PA-HO",
+   "zone": "PA-HO",
+   "label": "HO",
+   "origin": [
+    137,
+    33
+   ],
+   "cols": 3,
+   "rows": 4,
+   "pitch": [
+    2.6,
+    2.8
+   ],
+   "slot": [
+    1.2,
+    1.0
+   ],
+   "fill": 0.25,
+   "src": "fictional"
+  }
+ ],
+ "equipment": [
+  {
+   "id": "ASRS-1",
+   "zone": "PA-ASRS",
+   "type": "asrs",
+   "name": "Magazine AS/RS",
+   "rect": [
+    176,
+    64,
+    196,
+    74
+   ],
+   "h": 10,
+   "ports": {
+    "packOut": [
+     175.2,
+     69
+    ],
+    "reinputIn": [
+     186,
+     63.2
+    ],
+    "amrOut": [
+     196.8,
+     69
+    ]
+   },
+   "src": "fictional"
+  },
+  {
+   "id": "TBL-ID",
+   "zone": "PA-PACK",
+   "type": "table",
+   "name": "ID & Label Table",
+   "rect": [
+    166.5,
+    68,
+    169.5,
+    71
+   ],
+   "h": 0.9,
+   "src": "fictional"
+  },
+  {
+   "id": "TBL-INS",
+   "zone": "PA-PACK",
+   "type": "table",
+   "name": "Inspection Table",
+   "rect": [
+    161.5,
+    68,
+    164.5,
+    71
+   ],
+   "h": 0.9,
+   "src": "fictional"
+  },
+  {
+   "id": "SHR-1",
+   "zone": "PA-PACK",
+   "type": "shrinkWrapper",
+   "name": "Shrink Wrapper 1",
+   "rect": [
+    155,
+    67,
+    159,
+    72
+   ],
+   "h": 2.2,
+   "src": "fictional"
+  },
+  {
+   "id": "SHR-2",
+   "zone": "PA-PACK",
+   "type": "shrinkWrapper",
+   "name": "Shrink Wrapper 2",
+   "rect": [
+    155,
+    74,
+    159,
+    79
+   ],
+   "h": 2.2,
+   "note": "Active only with packOption 2",
+   "src": "fictional"
+  },
+  {
+   "id": "TBL-STF",
+   "zone": "PA-PACK",
+   "type": "table",
+   "name": "Mid-box Stuffing Table",
+   "rect": [
+    144,
+    78,
+    148,
+    81
+   ],
+   "h": 0.9,
+   "src": "fictional"
+  },
+  {
+   "id": "TBL-PLT",
+   "zone": "PA-PACK",
+   "type": "palletStand",
+   "name": "Large-box Pallet Stand",
+   "rect": [
+    139,
+    78,
+    142,
+    81
+   ],
+   "h": 0.3,
+   "src": "fictional"
+  },
+  {
+   "id": "BND-1",
+   "zone": "PA-PACK",
+   "type": "bander",
+   "name": "Banding Machine",
+   "rect": [
+    137,
+    83,
+    140,
+    86
+   ],
+   "h": 2.4,
+   "src": "fictional"
+  },
+  {
+   "id": "TBL-UNPK",
+   "zone": "PA-UNPK",
+   "type": "table",
+   "name": "Unpack Table",
+   "rect": [
+    138,
+    50,
+    142,
+    53
+   ],
+   "h": 0.9,
+   "src": "fictional"
+  },
+  {
+   "id": "TBL-MAG",
+   "zone": "PA-UNPK",
+   "type": "table",
+   "name": "Magazine Load Table",
+   "rect": [
+    143,
+    50,
+    145.5,
+    53
+   ],
+   "h": 0.9,
+   "src": "fictional"
+  },
+  {
+   "id": "KIT-1",
+   "zone": "PA-KIT",
+   "type": "table",
+   "name": "Kitting Table 1",
+   "rect": [
+    150,
+    14,
+    156,
+    18
+   ],
+   "h": 0.9,
+   "src": "fictional"
+  },
+  {
+   "id": "KIT-2",
+   "zone": "PA-KIT",
+   "type": "table",
+   "name": "Kitting Table 2",
+   "rect": [
+    158,
+    14,
+    164,
+    18
+   ],
+   "h": 0.9,
+   "src": "fictional"
+  },
+  {
+   "id": "LINE-1",
+   "zone": "PA-CELL",
+   "type": "cellLine",
+   "name": "Cell Line (context)",
+   "rect": [
+    152,
+    38,
+    214,
+    52
+   ],
+   "h": 4,
+   "src": "fictional"
+  }
+ ],
+ "docks": [
+  {
+   "id": "D-OW-IN",
+   "module": "OW",
+   "at": [
+    0,
+    41
+   ],
+   "dir": "W",
+   "door": 3.5,
+   "use": "supplier inbound",
+   "src": "fictional"
+  },
+  {
+   "id": "D-OW-1",
+   "module": "OW",
+   "at": [
+    64,
+    36
+   ],
+   "dir": "E",
+   "door": 3.5,
+   "use": "shuttle load",
+   "src": "fictional"
+  },
+  {
+   "id": "D-OW-2",
+   "module": "OW",
+   "at": [
+    64,
+    42
+   ],
+   "dir": "E",
+   "door": 3.5,
+   "use": "shuttle load",
+   "src": "fictional"
+  },
+  {
+   "id": "D-PA-1",
+   "module": "PA",
+   "at": [
+    100,
+    36
+   ],
+   "dir": "W",
+   "door": 3.5,
+   "use": "shuttle unload",
+   "src": "fictional"
+  },
+  {
+   "id": "D-PA-2",
+   "module": "PA",
+   "at": [
+    100,
+    42
+   ],
+   "dir": "W",
+   "door": 3.5,
+   "use": "shuttle unload",
+   "src": "fictional"
+  }
+ ],
+ "corridors": [
+  {
+   "id": "C-OW-Z",
+   "module": "OW",
+   "axis": "z",
+   "at": 50,
+   "from": 2,
+   "to": 48,
+   "src": "fictional"
+  },
+  {
+   "id": "C-OW-X",
+   "module": "OW",
+   "axis": "x",
+   "at": 31.5,
+   "from": 2,
+   "to": 62,
+   "src": "fictional"
+  },
+  {
+   "id": "C-RD",
+   "module": "ROAD",
+   "axis": "x",
+   "at": 39,
+   "from": 64,
+   "to": 100,
+   "src": "fictional"
+  },
+  {
+   "id": "C-PA-Z",
+   "module": "PA",
+   "axis": "z",
+   "at": 134,
+   "from": 2,
+   "to": 88,
+   "src": "fictional"
+  },
+  {
+   "id": "C-PA-X1",
+   "module": "PA",
+   "axis": "x",
+   "at": 30,
+   "from": 101,
+   "to": 218,
+   "src": "fictional"
+  },
+  {
+   "id": "C-PA-X2",
+   "module": "PA",
+   "axis": "x",
+   "at": 60,
+   "from": 101,
+   "to": 218,
+   "src": "fictional"
+  },
+  {
+   "id": "C-OW-A1",
+   "module": "OW",
+   "axis": "x",
+   "at": 5.75,
+   "from": 2,
+   "to": 50,
+   "src": "fictional"
+  },
+  {
+   "id": "C-OW-A2",
+   "module": "OW",
+   "axis": "x",
+   "at": 11.45,
+   "from": 2,
+   "to": 50,
+   "src": "fictional"
+  },
+  {
+   "id": "C-OW-A3",
+   "module": "OW",
+   "axis": "x",
+   "at": 17.15,
+   "from": 2,
+   "to": 50,
+   "src": "fictional"
+  },
+  {
+   "id": "C-OW-A4",
+   "module": "OW",
+   "axis": "x",
+   "at": 22.85,
+   "from": 2,
+   "to": 50,
+   "src": "fictional"
+  },
+  {
+   "id": "C-OW-A5",
+   "module": "OW",
+   "axis": "x",
+   "at": 28.55,
+   "from": 2,
+   "to": 50,
+   "src": "fictional"
+  },
+  {
+   "id": "C-RM-A1",
+   "module": "PA",
+   "axis": "x",
+   "at": 5.75,
+   "from": 102,
+   "to": 134,
+   "src": "fictional"
+  },
+  {
+   "id": "C-RM-A2",
+   "module": "PA",
+   "axis": "x",
+   "at": 11.45,
+   "from": 102,
+   "to": 134,
+   "src": "fictional"
+  },
+  {
+   "id": "C-RM-A3",
+   "module": "PA",
+   "axis": "x",
+   "at": 17.15,
+   "from": 102,
+   "to": 134,
+   "src": "fictional"
+  },
+  {
+   "id": "C-RM-A4",
+   "module": "PA",
+   "axis": "x",
+   "at": 22.85,
+   "from": 102,
+   "to": 134,
+   "src": "fictional"
+  },
+  {
+   "id": "C-FG-A1",
+   "module": "PA",
+   "axis": "x",
+   "at": 63.75,
+   "from": 102,
+   "to": 134,
+   "src": "fictional"
+  },
+  {
+   "id": "C-FG-A2",
+   "module": "PA",
+   "axis": "x",
+   "at": 69.65,
+   "from": 102,
+   "to": 134,
+   "src": "fictional"
+  },
+  {
+   "id": "C-FG-A3",
+   "module": "PA",
+   "axis": "x",
+   "at": 75.55,
+   "from": 102,
+   "to": 134,
+   "src": "fictional"
+  },
+  {
+   "id": "C-FG-A4",
+   "module": "PA",
+   "axis": "x",
+   "at": 81.45,
+   "from": 102,
+   "to": 134,
+   "src": "fictional"
+  }
+ ],
+ "items": [
+  {
+   "pn": "RM-100101",
+   "desc": "Electrode Foil Roll A",
+   "uom": "PLT",
+   "kind": "RM",
+   "src": "fictional"
+  },
+  {
+   "pn": "RM-100102",
+   "desc": "Electrode Foil Roll B",
+   "uom": "PLT",
+   "kind": "RM",
+   "src": "fictional"
+  },
+  {
+   "pn": "RM-100215",
+   "desc": "Separator Film Roll",
+   "uom": "PLT",
+   "kind": "RM",
+   "src": "fictional"
+  },
+  {
+   "pn": "RM-100330",
+   "desc": "Electrolyte Drum",
+   "uom": "PLT",
+   "kind": "RM",
+   "src": "fictional"
+  },
+  {
+   "pn": "RM-100418",
+   "desc": "Can Housing Tray",
+   "uom": "PLT",
+   "kind": "RM",
+   "src": "fictional"
+  },
+  {
+   "pn": "RM-100422",
+   "desc": "Cap Assembly Tray",
+   "uom": "PLT",
+   "kind": "RM",
+   "src": "fictional"
+  },
+  {
+   "pn": "RM-100507",
+   "desc": "Tab Lead Reel",
+   "uom": "PLT",
+   "kind": "RM",
+   "src": "fictional"
+  },
+  {
+   "pn": "RM-100611",
+   "desc": "Insulation Tape Reel",
+   "uom": "PLT",
+   "kind": "RM",
+   "src": "fictional"
+  },
+  {
+   "pn": "FG-200101",
+   "desc": "Cell Model A1",
+   "uom": "EA",
+   "kind": "FG",
+   "src": "fictional"
+  },
+  {
+   "pn": "FG-200102",
+   "desc": "Cell Model A2",
+   "uom": "EA",
+   "kind": "FG",
+   "src": "fictional"
+  },
+  {
+   "pn": "FG-200201",
+   "desc": "Cell Model B1",
+   "uom": "EA",
+   "kind": "FG",
+   "src": "fictional"
+  }
+ ],
+ "volumes": {
+  "daily": {
+   "rmPallets": 120,
+   "fgLargeBoxes": 12,
+   "reinputLargeBoxes": 4,
+   "src": "fictional"
+  },
+  "levels": [
+   {
+    "level": 0,
+    "factor": 1.0,
+    "src": "assumption"
+   },
+   {
+    "level": 1,
+    "factor": 1.2,
+    "src": "assumption"
+   },
+   {
+    "level": 2,
+    "factor": 1.4,
+    "src": "assumption"
+   },
+   {
+    "level": 3,
+    "factor": 1.6,
+    "src": "assumption"
+   },
+   {
+    "level": 4,
+    "factor": 1.8,
+    "src": "assumption"
+   }
+  ],
+  "shuttle": {
+   "depart": [
+    1800,
+    12600,
+    23400,
+    34200,
+    45000,
+    55800,
+    66600,
+    77400
+   ],
+   "travelMin": 25,
+   "PLT": 28,
+   "loadMinPerPlt": 1.5,
+   "src": "fictional"
+  },
+  "shifts": {
+   "A": [
+    21600,
+    64800
+   ],
+   "B": [
+    64800,
+    108000
+   ],
+   "src": "assumption"
+  }
+ },
+ "resourceTypes": [
+  {
+   "id": "forklift",
+   "speed": 2.2,
+   "speedLoaded": 1.8,
+   "capacity": 1,
+   "capUnit": "PLT",
+   "turnRadius": 2.1,
+   "color": "#e3a21a",
+   "src": "estimate"
+  },
+  {
+   "id": "palletJack",
+   "speed": 1.2,
+   "speedLoaded": 1.0,
+   "capacity": 1,
+   "capUnit": "PLT",
+   "turnRadius": 1.2,
+   "color": "#d9822b",
+   "src": "estimate"
+  },
+  {
+   "id": "amr",
+   "speed": 1.0,
+   "speedLoaded": 0.9,
+   "capacity": 8,
+   "capUnit": "magazine",
+   "turnRadius": 0.8,
+   "color": "#2b8fd9",
+   "src": "estimate"
+  },
+  {
+   "id": "truck",
+   "speed": 8.0,
+   "speedLoaded": 8.0,
+   "capacity": 28,
+   "capUnit": "PLT",
+   "turnRadius": 9.0,
+   "color": "#c8ccd4",
+   "src": "estimate"
+  },
+  {
+   "id": "flatCart",
+   "speed": 1.0,
+   "speedLoaded": 0.9,
+   "capacity": 16,
+   "capUnit": "small box",
+   "turnRadius": 0.8,
+   "color": "#6c8ebf",
+   "src": "estimate"
+  },
+  {
+   "id": "magCart",
+   "speed": 1.0,
+   "speedLoaded": 0.9,
+   "capacity": 20,
+   "capUnit": "empty magazine",
+   "turnRadius": 0.8,
+   "color": "#7a9e7e",
+   "src": "estimate"
+  },
+  {
+   "id": "worker",
+   "speed": 1.2,
+   "speedLoaded": 1.1,
+   "capacity": 1,
+   "capUnit": "box",
+   "turnRadius": 0.0,
+   "color": "#f2f2f2",
+   "src": "estimate"
+  }
+ ],
+ "resources": [
+  {
+   "id": "FL-OW-1",
+   "type": "forklift",
+   "name": "Forklift OW-1",
+   "role": "Forklift Driver",
+   "group": "Offsite Warehouse",
+   "process": "ow-move",
+   "flow": "A",
+   "home": [
+    51,
+    33
+   ],
+   "shift": "A",
+   "zone": "OW-STO",
+   "src": "fictional"
+  },
+  {
+   "id": "FL-OW-2",
+   "type": "forklift",
+   "name": "Forklift OW-2",
+   "role": "Forklift Driver",
+   "group": "Offsite Warehouse",
+   "process": "ow-move",
+   "flow": "A",
+   "home": [
+    51,
+    30
+   ],
+   "shift": "A",
+   "zone": "OW-STO",
+   "src": "fictional"
+  },
+  {
+   "id": "FL-OW-3",
+   "type": "forklift",
+   "name": "Forklift OW-3",
+   "role": "Forklift Driver",
+   "group": "Offsite Warehouse",
+   "process": "ow-move",
+   "flow": "A",
+   "home": [
+    51,
+    33
+   ],
+   "shift": "B",
+   "zone": "OW-STO",
+   "src": "fictional"
+  },
+  {
+   "id": "MH-OW-1",
+   "type": "worker",
+   "name": "Material Handler OW-1",
+   "role": "Material Handler",
+   "group": "Offsite Warehouse",
+   "process": "ow-label",
+   "flow": "A",
+   "home": [
+    12,
+    33
+   ],
+   "shift": "A",
+   "zone": "OW-RCV",
+   "src": "fictional"
+  },
+  {
+   "id": "MH-OW-2",
+   "type": "worker",
+   "name": "Material Handler OW-2",
+   "role": "Material Handler",
+   "group": "Offsite Warehouse",
+   "process": "ow-label",
+   "flow": "A",
+   "home": [
+    12,
+    33
+   ],
+   "shift": "B",
+   "zone": "OW-RCV",
+   "src": "fictional"
+  },
+  {
+   "id": "TRK-1",
+   "type": "truck",
+   "name": "Shuttle 1",
+   "role": "Shuttle Driver",
+   "group": "Transport",
+   "process": "shuttle",
+   "flow": "A",
+   "home": [
+    70,
+    39
+   ],
+   "shift": "A",
+   "zone": "OW-STG",
+   "src": "fictional"
+  },
+  {
+   "id": "TRK-2",
+   "type": "truck",
+   "name": "Shuttle 2",
+   "role": "Shuttle Driver",
+   "group": "Transport",
+   "process": "shuttle",
+   "flow": "A",
+   "home": [
+    70,
+    39
+   ],
+   "shift": "B",
+   "zone": "OW-STG",
+   "src": "fictional"
+  },
+  {
+   "id": "FL-PA-1",
+   "type": "forklift",
+   "name": "Forklift PA-1",
+   "role": "Forklift Driver",
+   "group": "Receiving",
+   "process": "pa-receive",
+   "flow": "A",
+   "home": [
+    117,
+    30
+   ],
+   "shift": "A",
+   "zone": "PA-DOCK",
+   "src": "fictional"
+  },
+  {
+   "id": "FL-PA-2",
+   "type": "forklift",
+   "name": "Forklift PA-2",
+   "role": "Forklift Driver",
+   "group": "Receiving",
+   "process": "pa-receive",
+   "flow": "A",
+   "home": [
+    117,
+    30
+   ],
+   "shift": "B",
+   "zone": "PA-DOCK",
+   "src": "fictional"
+  },
+  {
+   "id": "MH-PA-1",
+   "type": "worker",
+   "name": "Material Handler PA-1",
+   "role": "Material Handler",
+   "group": "Receiving",
+   "process": "pa-iqc",
+   "flow": "A",
+   "home": [
+    125,
+    31
+   ],
+   "shift": "A",
+   "zone": "PA-IQC",
+   "src": "fictional"
+  },
+  {
+   "id": "MH-PA-2",
+   "type": "worker",
+   "name": "Material Handler PA-2",
+   "role": "Material Handler",
+   "group": "Receiving",
+   "process": "pa-iqc",
+   "flow": "A",
+   "home": [
+    125,
+    31
+   ],
+   "shift": "B",
+   "zone": "PA-IQC",
+   "src": "fictional"
+  },
+  {
+   "id": "FL-PA-3",
+   "type": "forklift",
+   "name": "Forklift PA-3",
+   "role": "Forklift Driver",
+   "group": "RM Feeding",
+   "process": "pa-feed",
+   "flow": "A",
+   "home": [
+    134,
+    28
+   ],
+   "shift": "A",
+   "zone": "PA-RM",
+   "src": "fictional"
+  },
+  {
+   "id": "FL-PA-4",
+   "type": "forklift",
+   "name": "Forklift PA-4",
+   "role": "Forklift Driver",
+   "group": "RM Feeding",
+   "process": "pa-feed",
+   "flow": "A",
+   "home": [
+    134,
+    28
+   ],
+   "shift": "B",
+   "zone": "PA-RM",
+   "src": "fictional"
+  },
+  {
+   "id": "PJ-1",
+   "type": "palletJack",
+   "name": "Pallet Jack 1",
+   "role": "Material Handler",
+   "group": "RM Feeding",
+   "process": "pa-handover",
+   "flow": "A",
+   "home": [
+    147,
+    31
+   ],
+   "shift": "A",
+   "zone": "PA-HO",
+   "src": "fictional"
+  },
+  {
+   "id": "PJ-2",
+   "type": "palletJack",
+   "name": "Pallet Jack 2",
+   "role": "Material Handler",
+   "group": "RM Feeding",
+   "process": "pa-handover",
+   "flow": "A",
+   "home": [
+    147,
+    31
+   ],
+   "shift": "B",
+   "zone": "PA-HO",
+   "src": "fictional"
+  },
+  {
+   "id": "PK-1",
+   "type": "worker",
+   "name": "Packer 1",
+   "role": "Packer",
+   "group": "Packing",
+   "process": "idLabel",
+   "flow": "B",
+   "home": [
+    168,
+    71.8
+   ],
+   "shift": "A",
+   "zone": "PA-PACK",
+   "src": "fictional"
+  },
+  {
+   "id": "PK-2",
+   "type": "worker",
+   "name": "Packer 2",
+   "role": "Packer",
+   "group": "Packing",
+   "process": "inspect",
+   "flow": "B",
+   "home": [
+    163,
+    71.8
+   ],
+   "shift": "A",
+   "zone": "PA-PACK",
+   "src": "fictional"
+  },
+  {
+   "id": "PK-3",
+   "type": "worker",
+   "name": "Packer 3",
+   "role": "Packer",
+   "group": "Packing",
+   "process": "shrink",
+   "flow": "B",
+   "home": [
+    157,
+    72.8
+   ],
+   "shift": "A",
+   "zone": "PA-PACK",
+   "src": "fictional"
+  },
+  {
+   "id": "PK-4",
+   "type": "worker",
+   "name": "Packer 4",
+   "role": "Packer",
+   "group": "Packing",
+   "process": "stuff",
+   "flow": "B",
+   "home": [
+    146,
+    81.8
+   ],
+   "shift": "A",
+   "zone": "PA-PACK",
+   "src": "fictional"
+  },
+  {
+   "id": "PK-5",
+   "type": "worker",
+   "name": "Packer 5",
+   "role": "Packer",
+   "group": "Packing",
+   "process": "idLabel",
+   "flow": "B",
+   "home": [
+    168,
+    71.8
+   ],
+   "shift": "B",
+   "zone": "PA-PACK",
+   "src": "fictional"
+  },
+  {
+   "id": "PK-6",
+   "type": "worker",
+   "name": "Packer 6",
+   "role": "Packer",
+   "group": "Packing",
+   "process": "inspect",
+   "flow": "B",
+   "home": [
+    163,
+    71.8
+   ],
+   "shift": "B",
+   "zone": "PA-PACK",
+   "src": "fictional"
+  },
+  {
+   "id": "PK-7",
+   "type": "worker",
+   "name": "Packer 7",
+   "role": "Packer",
+   "group": "Packing",
+   "process": "shrink",
+   "flow": "B",
+   "home": [
+    157,
+    72.8
+   ],
+   "shift": "B",
+   "zone": "PA-PACK",
+   "src": "fictional"
+  },
+  {
+   "id": "PK-8",
+   "type": "worker",
+   "name": "Packer 8",
+   "role": "Packer",
+   "group": "Packing",
+   "process": "stuff",
+   "flow": "B",
+   "home": [
+    146,
+    81.8
+   ],
+   "shift": "B",
+   "zone": "PA-PACK",
+   "src": "fictional"
+  },
+  {
+   "id": "FL-PA-5",
+   "type": "forklift",
+   "name": "Forklift PA-5",
+   "role": "Forklift Driver",
+   "group": "FG & Re-input",
+   "process": "fg-move",
+   "flow": "B",
+   "home": [
+    134,
+    61
+   ],
+   "shift": "A",
+   "zone": "PA-FG",
+   "src": "fictional"
+  },
+  {
+   "id": "FL-PA-6",
+   "type": "forklift",
+   "name": "Forklift PA-6",
+   "role": "Forklift Driver",
+   "group": "FG & Re-input",
+   "process": "fg-move",
+   "flow": "B",
+   "home": [
+    134,
+    61
+   ],
+   "shift": "B",
+   "zone": "PA-FG",
+   "src": "fictional"
+  },
+  {
+   "id": "MH-UP-1",
+   "type": "worker",
+   "name": "Material Handler UP-1",
+   "role": "Material Handler",
+   "group": "FG & Re-input",
+   "process": "unpack",
+   "flow": "B",
+   "home": [
+    140,
+    53.8
+   ],
+   "shift": "A",
+   "zone": "PA-UNPK",
+   "src": "fictional"
+  },
+  {
+   "id": "MH-UP-2",
+   "type": "worker",
+   "name": "Material Handler UP-2",
+   "role": "Material Handler",
+   "group": "FG & Re-input",
+   "process": "unpack",
+   "flow": "B",
+   "home": [
+    140,
+    53.8
+   ],
+   "shift": "B",
+   "zone": "PA-UNPK",
+   "src": "fictional"
+  },
+  {
+   "id": "OPS-1",
+   "type": "worker",
+   "name": "Operations Support",
+   "role": "Operations Support",
+   "group": "Support",
+   "process": "support",
+   "flow": "AB",
+   "home": [
+    135.5,
+    59
+   ],
+   "shift": "A",
+   "zone": "PA-HO",
+   "src": "fictional"
+  },
+  {
+   "id": "FC-1",
+   "type": "flatCart",
+   "name": "Flat Cart 1",
+   "role": "Equipment",
+   "group": "Equipment",
+   "process": "flatCart",
+   "flow": "B",
+   "home": [
+    154.2,
+    69.5
+   ],
+   "shift": "all",
+   "zone": "PA-PACK",
+   "person": false,
+   "src": "fictional"
+  },
+  {
+   "id": "MC-1",
+   "type": "magCart",
+   "name": "Magazine Cart 1",
+   "role": "Equipment",
+   "group": "Equipment",
+   "process": "magCart",
+   "flow": "B",
+   "home": [
+    144.2,
+    55
+   ],
+   "shift": "all",
+   "zone": "PA-UNPK",
+   "person": false,
+   "src": "fictional"
+  },
+  {
+   "id": "AMR-IN-1",
+   "type": "amr",
+   "name": "AMR In 1",
+   "role": "AMR",
+   "group": "Equipment",
+   "process": "amrIn",
+   "flow": "B",
+   "home": [
+    148.5,
+    59
+   ],
+   "shift": "all",
+   "zone": "PA-UNPK",
+   "person": false,
+   "presetGated": "equip.amrIn",
+   "gateIndex": 1,
+   "src": "fictional"
+  },
+  {
+   "id": "AMR-IN-2",
+   "type": "amr",
+   "name": "AMR In 2",
+   "role": "AMR",
+   "group": "Equipment",
+   "process": "amrIn",
+   "flow": "B",
+   "home": [
+    150.0,
+    59
+   ],
+   "shift": "all",
+   "zone": "PA-UNPK",
+   "person": false,
+   "presetGated": "equip.amrIn",
+   "gateIndex": 2,
+   "src": "fictional"
+  },
+  {
+   "id": "AMR-IN-3",
+   "type": "amr",
+   "name": "AMR In 3",
+   "role": "AMR",
+   "group": "Equipment",
+   "process": "amrIn",
+   "flow": "B",
+   "home": [
+    151.5,
+    59
+   ],
+   "shift": "all",
+   "zone": "PA-UNPK",
+   "person": false,
+   "presetGated": "equip.amrIn",
+   "gateIndex": 3,
+   "src": "fictional"
+  },
+  {
+   "id": "AMR-OUT-1",
+   "type": "amr",
+   "name": "AMR Out 1",
+   "role": "AMR",
+   "group": "Equipment",
+   "process": "amrOut",
+   "flow": "B",
+   "home": [
+    198.8,
+    66.5
+   ],
+   "shift": "all",
+   "zone": "PA-ASRS",
+   "person": false,
+   "presetGated": "equip.amrOut",
+   "gateIndex": 1,
+   "src": "fictional"
+  },
+  {
+   "id": "AMR-OUT-2",
+   "type": "amr",
+   "name": "AMR Out 2",
+   "role": "AMR",
+   "group": "Equipment",
+   "process": "amrOut",
+   "flow": "B",
+   "home": [
+    198.8,
+    68.5
+   ],
+   "shift": "all",
+   "zone": "PA-ASRS",
+   "person": false,
+   "presetGated": "equip.amrOut",
+   "gateIndex": 2,
+   "src": "fictional"
+  },
+  {
+   "id": "AMR-OUT-3",
+   "type": "amr",
+   "name": "AMR Out 3",
+   "role": "AMR",
+   "group": "Equipment",
+   "process": "amrOut",
+   "flow": "B",
+   "home": [
+    198.8,
+    70.5
+   ],
+   "shift": "all",
+   "zone": "PA-ASRS",
+   "person": false,
+   "presetGated": "equip.amrOut",
+   "gateIndex": 3,
+   "src": "fictional"
+  }
+ ],
+ "staffing": [
+  {
+   "group": "Offsite Warehouse",
+   "role": "Forklift Driver",
+   "shift": "A",
+   "n": 2,
+   "src": "fictional"
+  },
+  {
+   "group": "Offsite Warehouse",
+   "role": "Forklift Driver",
+   "shift": "B",
+   "n": 1,
+   "src": "fictional"
+  },
+  {
+   "group": "Offsite Warehouse",
+   "role": "Material Handler",
+   "shift": "A",
+   "n": 1,
+   "src": "fictional"
+  },
+  {
+   "group": "Offsite Warehouse",
+   "role": "Material Handler",
+   "shift": "B",
+   "n": 1,
+   "src": "fictional"
+  },
+  {
+   "group": "Transport",
+   "role": "Shuttle Driver",
+   "shift": "A",
+   "n": 1,
+   "src": "fictional"
+  },
+  {
+   "group": "Transport",
+   "role": "Shuttle Driver",
+   "shift": "B",
+   "n": 1,
+   "src": "fictional"
+  },
+  {
+   "group": "Receiving",
+   "role": "Forklift Driver",
+   "shift": "A",
+   "n": 1,
+   "src": "fictional"
+  },
+  {
+   "group": "Receiving",
+   "role": "Forklift Driver",
+   "shift": "B",
+   "n": 1,
+   "src": "fictional"
+  },
+  {
+   "group": "Receiving",
+   "role": "Material Handler",
+   "shift": "A",
+   "n": 1,
+   "src": "fictional"
+  },
+  {
+   "group": "Receiving",
+   "role": "Material Handler",
+   "shift": "B",
+   "n": 1,
+   "src": "fictional"
+  },
+  {
+   "group": "RM Feeding",
+   "role": "Forklift Driver",
+   "shift": "A",
+   "n": 1,
+   "src": "fictional"
+  },
+  {
+   "group": "RM Feeding",
+   "role": "Forklift Driver",
+   "shift": "B",
+   "n": 1,
+   "src": "fictional"
+  },
+  {
+   "group": "RM Feeding",
+   "role": "Material Handler",
+   "shift": "A",
+   "n": 1,
+   "src": "fictional"
+  },
+  {
+   "group": "RM Feeding",
+   "role": "Material Handler",
+   "shift": "B",
+   "n": 1,
+   "src": "fictional"
+  },
+  {
+   "group": "Packing",
+   "role": "Packer",
+   "shift": "A",
+   "n": 4,
+   "src": "fictional"
+  },
+  {
+   "group": "Packing",
+   "role": "Packer",
+   "shift": "B",
+   "n": 4,
+   "src": "fictional"
+  },
+  {
+   "group": "FG & Re-input",
+   "role": "Forklift Driver",
+   "shift": "A",
+   "n": 1,
+   "src": "fictional"
+  },
+  {
+   "group": "FG & Re-input",
+   "role": "Forklift Driver",
+   "shift": "B",
+   "n": 1,
+   "src": "fictional"
+  },
+  {
+   "group": "FG & Re-input",
+   "role": "Material Handler",
+   "shift": "A",
+   "n": 1,
+   "src": "fictional"
+  },
+  {
+   "group": "FG & Re-input",
+   "role": "Material Handler",
+   "shift": "B",
+   "n": 1,
+   "src": "fictional"
+  },
+  {
+   "group": "Support",
+   "role": "Operations Support",
+   "shift": "A",
+   "n": 1,
+   "src": "fictional"
+  }
+ ],
+ "staffingTotal": {
+  "persons": 28,
+  "src": "fictional"
+ },
+ "packStations": {
+  "src": "assumption",
+  "points": [
+   {
+    "id": "discharge",
+    "zone": "PA-ASRS",
+    "equip": "ASRS-1",
+    "at": [
+     175.2,
+     69
+    ],
+    "sec": 12
+   },
+   {
+    "id": "idLabel",
+    "zone": "PA-PACK",
+    "equip": "TBL-ID",
+    "at": [
+     168,
+     71.8
+    ],
+    "sec": 30
+   },
+   {
+    "id": "inspect",
+    "zone": "PA-PACK",
+    "equip": "TBL-INS",
+    "at": [
+     163,
+     71.8
+    ],
+    "sec": 35
+   },
+   {
+    "id": "shrink",
+    "zone": "PA-PACK",
+    "equip": "SHR-1",
+    "at": [
+     157,
+     72.8
+    ],
+    "sec": 50
+   },
+   {
+    "id": "shrink2",
+    "zone": "PA-PACK",
+    "equip": "SHR-2",
+    "at": [
+     157,
+     79.8
+    ],
+    "sec": 50
+   },
+   {
+    "id": "stuff",
+    "zone": "PA-PACK",
+    "equip": "TBL-STF",
+    "at": [
+     146,
+     81.8
+    ],
+    "sec": 60
+   },
+   {
+    "id": "palletize",
+    "zone": "PA-PACK",
+    "equip": "TBL-PLT",
+    "at": [
+     140.5,
+     81.8
+    ],
+    "sec": 40
+   },
+   {
+    "id": "band",
+    "zone": "PA-PACK",
+    "equip": "BND-1",
+    "at": [
+     141,
+     84.5
+    ],
+    "sec": 180
+   },
+   {
+    "id": "unpack",
+    "zone": "PA-UNPK",
+    "equip": "TBL-UNPK",
+    "at": [
+     140,
+     53.8
+    ],
+    "sec": 25
+   },
+   {
+    "id": "magLoad",
+    "zone": "PA-UNPK",
+    "equip": "TBL-MAG",
+    "at": [
+     144.2,
+     53.8
+    ],
+    "sec": 20
+   },
+   {
+    "id": "asrsIn",
+    "zone": "PA-ASRS",
+    "equip": "ASRS-1",
+    "at": [
+     186,
+     63.2
+    ],
+    "sec": 15
+   },
+   {
+    "id": "amrOut",
+    "zone": "PA-ASRS",
+    "equip": "ASRS-1",
+    "at": [
+     196.8,
+     69
+    ],
+    "sec": 15
+   },
+   {
+    "id": "nextProcess",
+    "zone": "PA-OUT",
+    "equip": null,
+    "at": [
+     209,
+     76
+    ],
+    "sec": 20
+   }
+  ],
+  "flatCartPath": [
+   [
+    154.2,
+    69.5
+   ],
+   [
+    151,
+    69.5
+   ],
+   [
+    151,
+    79.5
+   ],
+   [
+    148.6,
+    79.5
+   ]
+  ],
+  "note": "sec = task time per small box (band: per large box, palletize: per mid box, stuff: per mid box)."
+ },
+ "assumptions": {
+  "packOption": 1,
+  "volumeLevel": 0,
+  "equip": {
+   "amrIn": 2,
+   "amrOut": 2
+  },
+  "manualKitting": false,
+  "glSplit": false,
+  "moveMetric": "corridor",
+  "lot": {
+   "palletsPerBatch": 4,
+   "magazinesPerLot": 48
+  },
+  "src": "assumption",
+  "doc": {
+   "packOption": "1 = one shrink wrapper (SHR-1); 2 = two wrappers (SHR-1 + SHR-2).",
+   "volumeLevel": "0-4, index into volumes.levels (daily volume factor).",
+   "equip": "Active AMR count per direction (1-3); resources gated by presetGated/gateIndex.",
+   "manualKitting": "true = RM is kitted by hand at the line handover (extra Material Handler time).",
+   "glSplit": "true = goods-to-line split: kitting moves to the Kitting Area (PA-KIT), handover only hands over kits.",
+   "moveMetric": "Travel distance measured along corridors (approach -> corridor axis -> approach).",
+   "lot": "Batch and lot granularity for lineage ids."
+  }
+ },
+ "presets": [
+  {
+   "id": "asWas",
+   "label": "AS-WAS",
+   "desc": "Manual kitting at the handover, one shrink wrapper, one AMR each way.",
+   "set": {
+    "packOption": 1,
+    "equip": {
+     "amrIn": 1,
+     "amrOut": 1
+    },
+    "manualKitting": true,
+    "glSplit": false
+   },
+   "src": "assumption"
+  },
+  {
+   "id": "asIs",
+   "label": "AS-IS",
+   "desc": "Current baseline: no manual kitting, one shrink wrapper, two AMRs each way.",
+   "set": {
+    "packOption": 1,
+    "equip": {
+     "amrIn": 2,
+     "amrOut": 2
+    },
+    "manualKitting": false,
+    "glSplit": false
+   },
+   "src": "assumption"
+  },
+  {
+   "id": "toBe",
+   "label": "TO-BE",
+   "desc": "Two shrink wrappers, three AMRs each way, kitting split into its own area.",
+   "set": {
+    "packOption": 2,
+    "equip": {
+     "amrIn": 3,
+     "amrOut": 3
+    },
+    "manualKitting": false,
+    "glSplit": true
+   },
+   "src": "assumption"
+  }
+ ],
+ "compareMetrics": {
+  "core": [
+   "packingUtilization",
+   "dailyThroughput",
+   "stagingDwellAvg"
+  ],
+  "labels": {
+   "packingUtilization": "Packing utilization",
+   "dailyThroughput": "Daily throughput (large boxes)",
+   "stagingDwellAvg": "Avg staging dwell"
+  }
+ },
+ "idFormats": {
+  "po": {
+   "prefix": "45",
+   "digits": 8
+  },
+  "grDoc": {
+   "prefix": "50",
+   "digits": 8
+  },
+  "batch": {
+   "prefix": "B",
+   "date": "YYMMDD",
+   "digits": 3
+  },
+  "barcode": {
+   "prefix": "SB",
+   "digits": 10
+  },
+  "lot": {
+   "prefix": "L",
+   "date": "YYMMDD",
+   "digits": 5
+  },
+  "transfer": {
+   "prefix": "ST",
+   "digits": 8
+  },
+  "magazine": {
+   "prefix": "MZ-",
+   "digits": 5
+  },
+  "smallBox": {
+   "prefix": "SBX-",
+   "digits": 6
+  },
+  "midBox": {
+   "prefix": "MBX-",
+   "digits": 5
+  },
+  "largeBox": {
+   "prefix": "LBX-",
+   "digits": 4
+  },
+  "dateCode": "261023",
+  "note": "Dummy formats for a fictional plant."
+ }
+}

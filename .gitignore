@@ -1,0 +1,7 @@
+node_modules/
+.scrub-terms.txt
+dist/
+__pycache__/
+*.pyc
+docs/_tmp/
+.DS_Store
