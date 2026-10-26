@@ -220,6 +220,39 @@ def main():
         chips = pg2.evaluate('document.querySelectorAll("#trace-out .chip").length')
         check('No match' in txt and 'Large box' in txt and chips == 3, 'unknown ID: "No match" + 3 IDs of the same kind')
         check(not pg2.evaluate('document.body.innerText.includes("null") || document.body.innerText.includes("undefined")'), 'no "null"/"undefined" on screen (T7/T8)')
+
+        # ---- T9: analysis (S5, S6) ----
+        pg2.click('[data-tab=analysis]'); pg2.wait_for_timeout(200)
+        pg2.evaluate('window.__pf.setPlaying(false); window.__pf.setTime(30000)')
+        pg2.click('[data-act=heat][data-mode=occupancy]'); pg2.wait_for_timeout(200)
+        hv = '''(async (t) => {
+          const { heatValues } = await import('./src/scenedata.js'); const { occupiedAt } = await import('./src/metrics.js');
+          const P = window.__pf, info = P.view.heatInfo();
+          const want = heatValues(P.view.slots, info.mode, { occ: occupiedAt(P.R, P.t), freq: P.M.freq });
+          let diff = 0; want.bins.forEach((b, i) => { if (b !== info.legend.bins[i]) diff++; });
+          return { diff, pal: P.view.scene.getMeshByName('pal-rm').isEnabled(), tiles: P.view.scene.getMeshByName('heat-tiles').isEnabled() };
+        })()'''
+        r1 = pg2.evaluate(hv)
+        pg2.evaluate('window.__pf.setTime(70000)'); pg2.wait_for_timeout(150)
+        r2 = pg2.evaluate(hv)
+        check(r1['diff'] == 0 and r2['diff'] == 0 and r1['tiles'] and not r1['pal'], 'heat map (occupancy) = slot occupancy at t, follows a scrub; pallets hidden')
+        pg2.click('[data-act=heat][data-mode=frequency]'); pg2.wait_for_timeout(150)
+        r3 = pg2.evaluate(hv)
+        check(r3['diff'] == 0, 'heat map (pick + put) = slot move counts')
+        pg2.click('[data-act=heat][data-mode=off]'); pg2.wait_for_timeout(100)
+        check(pg2.evaluate('window.__pf.view.scene.getMeshByName("pal-rm").isEnabled() && !window.__pf.view.scene.getMeshByName("heat-tiles").isEnabled()'), 'heat map off restores pallets')
+        pg2.locator('.hours .hr[data-h="14"] .hit').click(force=True); pg2.wait_for_timeout(100)
+        check(abs(pg2.evaluate('window.__pf.t') - 14 * 3600) < 1e-6, 'workload chart: click an hour jumps there')
+        before = pg2.evaluate('JSON.stringify(window.__pf.M.core) + "|" + window.__pf.R.assumptions.volumeLevel + "|" + window.__pf.t')
+        pg2.click('#scen-run')
+        pg2.wait_for_function('window.__pf.analysis.scenarios && window.__pf.analysis.scenarios.done', timeout=60000)
+        sc = pg2.evaluate('window.__pf.analysis.scenarios.rows.map(r => ({ level: r.level, u: r.core.packingUtilization, tp: r.core.dailyThroughput }))')
+        after = pg2.evaluate('JSON.stringify(window.__pf.M.core) + "|" + window.__pf.R.assumptions.volumeLevel + "|" + window.__pf.t')
+        core0 = pg2.evaluate('window.__pf.M.core')
+        check(len(sc) == 5 and abs(sc[0]['u'] - core0['packingUtilization']) < 1e-12 and sc[0]['tp'] == core0['dailyThroughput'], f"volume scenarios: 5 levels, level 0 = the day on screen ({[round(x['u'] * 100, 1) for x in sc]})")
+        check(any(x['u'] > 0.85 for x in sc) and 'crosses 85%' in pg2.inner_text('#scen-out'), 'volume scenarios show where packing crosses 85%')
+        check(before == after, 'volume scenarios leave the day on screen unchanged')
+        pg2.screenshot(path=os.path.join(DOCS, 't9-analysis.png'))
         pg2.close()
 
         pg, _ = open_page(b, url, 390, 800, errors)

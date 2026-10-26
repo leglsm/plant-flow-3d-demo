@@ -27,11 +27,19 @@ export function comparePresets(L, base = {}) {
   });
 }
 
+/** One volume level under the given assumptions (the UI runs these one by one to show progress). */
+export function volumeLevel(L, base, level) {
+  const lv = L.volumes.levels.find((x) => x.level === level);
+  if (!lv) throw new Error(`volume level ${level} not in volumes.levels`);
+  const R = runDay(L, { ...base, volumeLevel: lv.level });
+  const M = computeMetrics(R);
+  return { level: lv.level, factor: lv.factor, core: M.core, packingBottleneck: M.packingBottleneck, stations: M.stations, bottlenecks: M.bottlenecks, backlog: M.backlog, dwellByGroup: M.dwellByGroup };
+}
+
 /** S6 / F-12: volume levels 0–4 under the given assumptions. */
 export function volumeScenarios(L, base = {}) {
-  return L.volumes.levels.map((lv) => {
-    const R = runDay(L, { ...base, volumeLevel: lv.level });
-    const M = computeMetrics(R);
-    return { level: lv.level, factor: lv.factor, core: M.core, packingBottleneck: M.packingBottleneck, stations: M.stations, bottlenecks: M.bottlenecks, backlog: M.backlog };
-  });
+  return L.volumes.levels.map((lv) => volumeLevel(L, base, lv.level));
 }
+
+/** Assumption overrides that reproduce a result's assumptions (for re-running variants of it). */
+export const overridesOf = (L, A) => toOver(L, A);

@@ -78,3 +78,39 @@ test('hms formats seconds of day', () => {
   assert.equal(hms(37800.7), '10:30:00');
   assert.equal(hms(86399), '23:59:59');
 });
+
+// ---- T9: heat map values (F-11) ----
+import { heatValues, HEAT_RAMP } from '../src/scenedata.js';
+import { computeMetrics } from '../src/metrics.js';
+import { volumeLevel, volumeScenarios, overridesOf } from '../src/presets.js';
+
+test('heat: 7-step ramp, every value falls inside its legend bin', () => {
+  assert.equal(HEAT_RAMP.length, 7);
+  const M = computeMetrics(R);
+  for (const t of [3600, 40000, 80000]) {
+    const h = heatValues(R.slots, 'occupancy', { occ: occupiedAt(R, t), freq: M.freq });
+    h.bins.forEach((b, i) => { assert.ok(b >= 0 && b <= 6); const v = h.values[i]; const lg = h.legend[b]; assert.ok(v >= lg.from - 1e-9 && (v < lg.to || b === 6)); });
+  }
+  const f = heatValues(R.slots, 'frequency', { occ: new Set(), freq: M.freq });
+  f.bins.forEach((b, i) => { const v = f.values[i], lg = f.legend[b]; assert.ok(v >= lg.from && v <= lg.to, `slot ${i} v=${v} bin=${b}`); });
+  assert.ok(f.bins.some((b) => b === 6));
+  assert.throws(() => heatValues(R.slots, 'rainbow', { occ: new Set(), freq: M.freq }));
+});
+
+test('heat occupancy: rack value = share of occupied positions in the bay', () => {
+  const occ = occupiedAt(R, 40000);
+  const h = heatValues(R.slots, 'occupancy', { occ, freq: new Map() });
+  const i = R.slots.findIndex((s) => s.kind === 'rack');
+  const s0 = R.slots[i];
+  const bay = R.slots.filter((s) => s.row === s0.row && s.bay === s0.bay);
+  assert.equal(h.values[i], bay.filter((s) => occ.has(s.id)).length / bay.length);
+});
+
+test('volume level run = the matching volumeScenarios entry; input day untouched', () => {
+  const base = overridesOf(L, R.assumptions);
+  const one = volumeLevel(L, base, 2);
+  const all = volumeScenarios(L, base);
+  assert.deepEqual(one.core, all[2].core);
+  assert.deepEqual(all[0].core, computeMetrics(R).core);
+  assert.equal(R.assumptions.volumeLevel, 0);
+});

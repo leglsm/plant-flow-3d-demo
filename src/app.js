@@ -9,8 +9,9 @@
  *   F-06 selection detail .......... yes (T7)
  *   F-07 WIP on tables ............. yes (T6)
  *   F-08/F-09 lineage / trace ...... yes (T3, T8) — replay rides the shared clock
- *   F-10/F-11 analysis / heat map .. computed (T4); tab T9
- *   F-12/F-13 scenarios / compare .. computed (T4); tab T10
+ *   F-10/F-11 analysis / heat map .. yes (T9)
+ *   F-12 volume scenarios .......... yes (T9) — full re-runs, the day on screen is untouched
+ *   F-13 preset compare ............ computed (T4); tab T10
  *   F-14 settings view ............. T10
  *   F-15 flow tour ................. T11
  *   F-16 demo guide ................ T11
@@ -23,6 +24,7 @@ import { createScene } from './scene3d.js';
 import { hms } from './scenedata.js';
 import { buildOpsPane, buildSelection, makeUnits, phaseText } from './ui.js';
 import { buildTracePane } from './trace.js';
+import { buildAnalysisPane } from './analysis.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -77,12 +79,14 @@ async function main() {
       const ph = phaseText(clock.t, view.activity());
       if (ph !== lastPhase) { lastPhase = ph; ui.phase.textContent = ph; }
       trace.tick();
+      analysis.tick();
       selTimer += dt;
       if (selTimer > 0.25) { selTimer = 0; sel.render(); }
     },
     onReady() { $('#loading').hidden = true; window.__pf.readyAt = performance.now(); },
   });
 
+  let curTab = 'ops'; // declared before any pane can ask isTabVisible()
   const ctx = {
     L, R, M, view, clock, units,
     select: (s) => sel.set(s),
@@ -92,15 +96,16 @@ async function main() {
   const ops = buildOpsPane($('#pane-ops'), ctx);
   const sel = buildSelection($('#sel'), ctx);
   const trace = buildTracePane($('#pane-trace'), ctx);
+  const analysis = buildAnalysisPane($('#pane-analysis'), ctx);
 
   view.setResult(R);
   ops.setResult(R);
   trace.setResult(R);
+  analysis.setResult(R);
   view.onPick = (info) => sel.set(info && info.kind !== 'point' ? info : info);
   clock.set(0);
 
   // ---- tabs & side panel ----
-  let curTab = 'ops';
   const titles = { ops: '3D Operations', trace: 'Lot Trace', analysis: 'Analysis', settings: 'Settings' };
   function setTab(tab) {
     curTab = tab;
@@ -137,7 +142,7 @@ async function main() {
 
   // test / debugging hooks (read-only use by e2e)
   window.__pf = {
-    L, R, M, view, simMs, clock, trace, sel, setTab,
+    L, R, M, view, simMs, clock, trace, sel, analysis, setTab,
     get t() { return clock.t; },
     setTime(t) { clock.set(t); },
     setPlaying(on) { clock.play(on); },

@@ -4,7 +4,7 @@
 // Uses the global BABYLON from lib/babylon.js (pinned 7.54.3).
 import { evalTrack } from './track.js';
 import { enumerateSlots, rackRect, rackType, dockPoints } from './geom.js';
-import { wipIntervals, wipAt, stackOffsets, SlotOcc, carryOf, UNIT_SIZE } from './scenedata.js';
+import { wipIntervals, wipAt, stackOffsets, SlotOcc, carryOf, UNIT_SIZE, heatValues, HEAT_RAMP } from './scenedata.js';
 
 const B = () => globalThis.BABYLON;
 
@@ -150,6 +150,38 @@ export function createScene(canvas, L, opts = {}) {
   for (const p of [palWood, palRM, palFG]) { p.mesh.isPickable = true; p.mesh.thinInstanceEnablePicking = true; p.mesh.metadata = { kind: 'pallets' }; }
   const palSlotOrder = { wood: [], rm: [], fg: [] };
 
+  // heat map tiles (F-11): one per slot, colour per instance, unlit so the ramp reads exactly
+  const heatMesh = BB.MeshBuilder.CreateBox('heat-tiles', { size: 1 }, scene);
+  {
+    const hm = new BB.StandardMaterial('m-heat', scene);
+    // unlit: final = emissive(1) × per-instance colour, so the ramp shows exactly
+    hm.diffuseColor = BB.Color3.White(); hm.disableLighting = true; hm.emissiveColor = BB.Color3.White();
+    heatMesh.material = hm;
+    const n = st.slots.length, buf = new Float32Array(16 * n), m = new BB.Matrix(), q = BB.Quaternion.Identity();
+    st.slots.forEach((sl, i) => {
+      const h = sl.kind === 'rack' ? Math.min(sl.h, 1.3) * 0.82 : 0.12;
+      BB.Matrix.ComposeToRef(new BB.Vector3(sl.w * 0.86, h, sl.d * 0.86), q, new BB.Vector3(sl.x, sl.y + (sl.kind === 'rack' && sl.level > 1 ? 0.08 : 0.02) + h / 2, sl.z), m);
+      m.copyToArray(buf, i * 16);
+    });
+    heatMesh.thinInstanceSetBuffer('matrix', buf, 16, true);
+    heatMesh.thinInstanceSetBuffer('color', new Float32Array(4 * n), 4, false);
+    heatMesh.alwaysSelectAsActiveMesh = true;
+    heatMesh.isPickable = true; heatMesh.thinInstanceEnablePicking = true; heatMesh.metadata = { kind: 'heat' };
+    heatMesh.setEnabled(false);
+  }
+  const heat = { mode: null, freq: null, version: -1, legend: null, rgb: HEAT_RAMP.map((h) => BB.Color3.FromHexString(h)) };
+  function paintHeat(force) {
+    if (!heat.mode || !st.occ) return;
+    if (!force && heat.mode === 'frequency') return;
+    if (!force && heat.version === st.occ.version) return;
+    heat.version = st.occ.version;
+    const r = heatValues(st.slots, heat.mode, { occ: st.occ.set, freq: heat.freq || new Map() });
+    heat.legend = r; heat.values = r.values;
+    const cb = new Float32Array(4 * st.slots.length);
+    r.bins.forEach((b, i) => { const c = heat.rgb[b]; cb[i * 4] = c.r; cb[i * 4 + 1] = c.g; cb[i * 4 + 2] = c.b; cb[i * 4 + 3] = 1; });
+    heatMesh.thinInstanceSetBuffer('color', cb, 4, false);
+  }
+
   // WIP boxes (F-07)
   const wipPools = Object.fromEntries(Object.keys(UNIT_SIZE).map((k) => [k, new Pool(scene, `wip-${k}`, mat(scene, `m-wip-${k}`, C.box[k]), 64)]));
   const yAt = surfaceHeights(L);
@@ -210,6 +242,7 @@ export function createScene(canvas, L, opts = {}) {
     const md = m && m.metadata;
     const p = [hit.pickedPoint.x, hit.pickedPoint.z];
     if (!md) return { kind: 'point', p };
+    if (md.kind === 'heat') { const sl = st.slots[hit.thinInstanceIndex]; return sl ? { kind: 'slot', id: sl.id, p } : { kind: 'point', p }; }
     if (md.kind === 'pallets') {
       const order = m === palWood.mesh ? palSlotOrder.wood : m === palRM.mesh ? palSlotOrder.rm : palSlotOrder.fg;
       const slot = order[hit.thinInstanceIndex];
@@ -300,6 +333,7 @@ export function createScene(canvas, L, opts = {}) {
       }
       palWood.set(wood); palRM.set(rm); palFG.set(fg);
     }
+    paintHeat(false);
     // WIP on tables / stands / outfeeds
     const groups = wipAt(st.wip, t);
     let key = '';
@@ -391,7 +425,7 @@ export function createScene(canvas, L, opts = {}) {
       const l = layerOf(m.name);
       if (!l) continue;
       const f = flowOfMesh(m.name);
-      m.setEnabled(layerState[l] && (!f || flowState[f]));
+      m.setEnabled(layerState[l] && (!f || flowState[f]) && !(l === 'pallets' && heat.mode));
     }
     for (const a of st.actors.values()) {
       if (a.machine) continue;
@@ -495,6 +529,16 @@ export function createScene(canvas, L, opts = {}) {
     get following() { return trace.follow; },
     traceInfo() { return { cur: trace.cur, markerPos: marker.isVisible ? [marker.position.x, marker.position.z] : null, cameraTarget: cams.target() }; },
     setSelection(obj) { sel.obj = obj; updateTargets(st.t); },
+    /** Heat map: mode null | 'occupancy' | 'frequency'. Returns the legend/result (bins, values). */
+    setHeat(mode, { freq } = {}) {
+      if (mode && !['occupancy', 'frequency'].includes(mode)) throw new Error(`unknown heat mode ${mode}`);
+      heat.mode = mode || null; heat.freq = freq || heat.freq;
+      heatMesh.setEnabled(!!heat.mode);
+      refreshEnabled();
+      if (heat.mode) paintHeat(true);
+      return heat.mode ? heat.legend : null;
+    },
+    heatInfo() { return heat.mode ? { mode: heat.mode, legend: heat.legend, slotIds: st.slots.map((x) => x.id) } : null; },
     objPos: (obj) => { const r = objPos(obj); return r ? r.p : null; },
     activity: () => st.activity || { moving: 0, working: 0 },
     /** world position [x, z] of a resource mesh (e2e / trace check). */

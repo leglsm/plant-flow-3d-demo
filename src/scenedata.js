@@ -125,3 +125,45 @@ export function hms(t) {
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60;
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(x).padStart(2, '0')}`;
 }
+
+// ---------------- heat map (F-11) ----------------
+/** Sequential single-hue ramp, 7 steps, low -> high. Dark scene: high = light (reads as "more"). */
+export const HEAT_RAMP = ['#0d366b', '#184f95', '#256abf', '#3987e5', '#6da7ec', '#9ec5f4', '#cde2fb'];
+
+/**
+ * Per-slot heat value and bin (0–6).
+ *  occupancy: rack slots = share of occupied positions in the same bay (all levels) at t;
+ *             floor slots = 0 / 1 (occupied at t).
+ *  frequency: puts + picks today per slot, binned against the busiest slot (0 stays bin 0).
+ * Returns { values: Float64Array, bins: Uint8Array, legend: [{bin, from, to}] }.
+ */
+export function heatValues(slots, mode, { occ, freq }) {
+  const n = slots.length, values = new Float64Array(n), bins = new Uint8Array(n);
+  if (mode === 'occupancy') {
+    const bay = new Map();
+    for (const s of slots) {
+      if (s.kind !== 'rack') continue;
+      const k = `${s.row}|${s.bay}`;
+      const b = bay.get(k) || bay.set(k, { n: 0, o: 0 }).get(k);
+      b.n++; if (occ.has(s.id)) b.o++;
+    }
+    slots.forEach((s, i) => {
+      const v = s.kind === 'rack' ? (() => { const b = bay.get(`${s.row}|${s.bay}`); return b.o / b.n; })() : occ.has(s.id) ? 1 : 0;
+      values[i] = v; bins[i] = Math.min(6, Math.floor(v * 7));
+    });
+    const legend = HEAT_RAMP.map((_, b) => ({ bin: b, from: b / 7, to: (b + 1) / 7 }));
+    return { values, bins, legend, unit: 'share' };
+  }
+  if (mode === 'frequency') {
+    let max = 0;
+    slots.forEach((s, i) => { const f = freq.get(s.id); const v = f ? f.puts + f.picks : 0; values[i] = v; if (v > max) max = v; });
+    // log scale: a few floor slots (dock, staging) take hundreds of moves, rack slots 1–4
+    const lm = Math.log(max + 1);
+    const binOf = (v) => (v <= 0 || max === 0 ? 0 : Math.max(1, Math.min(6, Math.ceil((Math.log(v + 1) / lm) * 6))));
+    slots.forEach((s, i) => { bins[i] = binOf(values[i]); });
+    const edge = (b) => Math.exp((b / 6) * lm) - 1; // upper value of bin b
+    const legend = HEAT_RAMP.map((_, b) => b === 0 ? { bin: 0, from: 0, to: 0 } : { bin: b, from: Math.floor(edge(b - 1)) + 1, to: Math.floor(edge(b)) });
+    return { values, bins, legend, unit: 'moves', max, scale: 'log' };
+  }
+  throw new Error(`unknown heat mode ${mode}`);
+}
